@@ -4,7 +4,10 @@ import { tutroController } from "./tutor.controller";
 
 const router = express.Router()
 
-router.post("/", auth(UserRole.STUDENT), tutroController.createTuror);
+router.get("/", auth(UserRole.STUDENT, UserRole.ADMIN), tutroController.getAllTutors);
+router.get("/:userId", auth(UserRole.STUDENT, UserRole.ADMIN), tutroController.getSingleTutor);
+
+router.post("/", auth(UserRole.STUDENT, UserRole.ADMIN), tutroController.createTuror);
 
 
 export const tutroRouter: Router = router;

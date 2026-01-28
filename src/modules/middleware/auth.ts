@@ -34,7 +34,6 @@ const auth = (...roles: UserRole[]) => {
                     message: "You are not authorized!"
                 })
             }
-            console.log(session)
 
             if (!session.user.emailVerified) {
                 return res.status(403).json({

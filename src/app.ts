@@ -19,7 +19,7 @@ app.use(express.json());
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use("/api/category", categoryRouter)
-app.use("/api/tutor", tutroRouter)
+app.use("/api/tutors", tutroRouter)
 
 app.get("/", (req, res) => {
     res.send("Skill Bridge");

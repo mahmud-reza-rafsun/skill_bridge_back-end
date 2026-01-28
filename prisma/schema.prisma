@@ -113,6 +113,8 @@ model TutorProfile {
   categoryName String
   category     Category @relation(fields: [categoryName], references: [name])
 
+  subject String[]
+
   bio          String @db.Text
   hourlyRate   Float
   availability Json

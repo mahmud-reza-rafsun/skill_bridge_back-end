@@ -2,7 +2,7 @@ import { UserRole } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma"
 
 const createTuror = async (data: any, id: string) => {
-    const { categoryName, bio, hourlyRate, availability } = data;
+    const { categoryName, bio, hourlyRate, availability, subject } = data;
     console.log(id)
     return prisma.$transaction(async (tx) => {
 
@@ -44,6 +44,7 @@ const createTuror = async (data: any, id: string) => {
                 availability: availability,
                 userId: id,
                 categoryName: categoryName,
+                subject: subject
             }
         });
         return {
@@ -53,6 +54,23 @@ const createTuror = async (data: any, id: string) => {
     });
 }
 
+const getAllTutors = async () => {
+    const result = await prisma.tutorProfile.findMany();
+    return result
+}
+
+const getSingleTutor = async (id: string) => {
+    const findSinlgeTutur = await prisma.tutorProfile.findUnique({
+        where: { id: id },
+    });
+    if (!findSinlgeTutur) {
+        throw new Error("Tutor not found!!!");
+    }
+    return findSinlgeTutur;
+}
+
 export const tutorService = {
-    createTuror
+    createTuror,
+    getAllTutors,
+    getSingleTutor
 }
