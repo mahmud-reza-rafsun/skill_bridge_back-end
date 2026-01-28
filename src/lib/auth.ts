@@ -42,14 +42,16 @@ export const auth = betterAuth({
         requireEmailVerification: true
     },
     emailVerification: {
+        sendOnSignUp: true,
         sendVerificationEmail: async ({ user, url, token }, request) => {
-            const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`
-            const info = await transporter.sendMail({
-                from: '"Skill Bridge" <skillbridge@edu.com>',
-                to: "rafsun16.it@gmail.com",
-                subject: "Hello ✔",
-                text: "Hello world?", // Plain-text version of the message
-                html: `
+            try {
+                const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`
+                const info = await transporter.sendMail({
+                    from: '"Skill Bridge" <skillbridge@edu.com>',
+                    to: "rafsun16.it@gmail.com",
+                    subject: "Congratulations you verify email",
+                    text: "we wish for your bright furure",
+                    html: `
                         <!DOCTYPE html>
                         <html lang="en">
                         <head>
@@ -113,9 +115,19 @@ export const auth = betterAuth({
                         </html>
                         `
 
-            });
+                });
 
-            console.log("Message sent:", info.messageId);
+                console.log("Message sent:", info.messageId);
+            } catch (err) {
+                console.log(err)
+                throw err
+            }
         },
     },
+    socialProviders: {
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+        }
+    }
 });
