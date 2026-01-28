@@ -110,8 +110,8 @@ model TutorProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  categoryName String
+  category     Category @relation(fields: [categoryName], references: [name])
 
   bio          String @db.Text
   hourlyRate   Float

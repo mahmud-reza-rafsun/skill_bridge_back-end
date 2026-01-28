@@ -3,7 +3,6 @@ import { categoryService } from "./category.service";
 
 const createCategory = async (req: Request, res: Response) => {
     try {
-        console.log(req.user)
         const data = req.body;
         const result = await categoryService.createCategory(data)
         res.status(201).json(result)

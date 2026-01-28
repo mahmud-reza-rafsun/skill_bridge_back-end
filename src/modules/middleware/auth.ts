@@ -28,14 +28,13 @@ const auth = (...roles: UserRole[]) => {
                 headers: req.headers as any
             })
 
-            console.log(session)
-
             if (!session) {
                 return res.status(401).json({
                     success: false,
                     message: "You are not authorized!"
                 })
             }
+            console.log(session)
 
             if (!session.user.emailVerified) {
                 return res.status(403).json({

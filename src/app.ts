@@ -4,6 +4,7 @@ import cors from "cors"
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import { categoryRouter } from "./modules/categories/category.route";
+import { tutroRouter } from "./modules/tutor/tutor.route";
 
 const app: Application = express();
 
@@ -18,9 +19,10 @@ app.use(express.json());
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use("/api/category", categoryRouter)
+app.use("/api/tutor", tutroRouter)
 
 app.get("/", (req, res) => {
-    res.send("Hello, World!");
+    res.send("Skill Bridge");
 });
 
 export default app;
