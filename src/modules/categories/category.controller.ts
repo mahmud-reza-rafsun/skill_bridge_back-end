@@ -1,0 +1,19 @@
+import { Request, Response } from "express";
+import { categoryService } from "./category.service";
+
+const createCategory = async (req: Request, res: Response) => {
+    try {
+        const data = req.body;
+        const result = await categoryService.createCategory(data)
+        res.status(201).json(result)
+    } catch (e) {
+        res.status(400).json({
+            error: "Category creation failed",
+            details: e
+        })
+    }
+}
+
+export const categoryController = {
+    createCategory
+}
