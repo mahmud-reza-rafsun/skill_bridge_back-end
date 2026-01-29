@@ -46,9 +46,8 @@ const getAllTutors = async (req: Request, res: Response) => {
 const getSingleTutor = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
-        console.log(userId)
         if (!userId) {
-            throw new Error("User id not found!!!")
+            throw new Error("Tutor id not found!!!")
         }
         const result = await tutorService.getSingleTutor(userId as string)
         res.status(200).json({
@@ -68,5 +67,5 @@ const getSingleTutor = async (req: Request, res: Response) => {
 export const tutroController = {
     createTuror,
     getAllTutors,
-    getSingleTutor
+    getSingleTutor,
 }

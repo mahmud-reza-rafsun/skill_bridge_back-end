@@ -9,5 +9,4 @@ router.get("/:userId", auth(UserRole.STUDENT, UserRole.ADMIN), tutroController.g
 
 router.post("/", auth(UserRole.STUDENT, UserRole.ADMIN), tutroController.createTuror);
 
-
 export const tutroRouter: Router = router;

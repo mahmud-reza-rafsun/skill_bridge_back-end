@@ -1,3 +1,4 @@
+import { TutorProfile } from "../../../generated/prisma/client";
 import { UserRole } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma"
 
@@ -69,8 +70,10 @@ const getSingleTutor = async (id: string) => {
     return findSinlgeTutur;
 }
 
+
+
 export const tutorService = {
     createTuror,
     getAllTutors,
-    getSingleTutor
+    getSingleTutor,
 }

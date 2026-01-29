@@ -2,8 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { auth as betterAuth } from '../../lib/auth'
 
 export enum UserRole {
+    ADMIN = "ADMIN",
+    TUTOR = "TUTOR",
     STUDENT = "STUDENT",
-    ADMIN = "ADMIN"
 }
 
 declare global {
