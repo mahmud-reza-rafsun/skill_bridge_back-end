@@ -69,7 +69,25 @@ const getAllBookings = async () => {
     return result;
 };
 
+const getSingleBooking = async (id: string) => {
+    const result = await prisma.booking.findUnique({
+        where: { id: id },
+        include: {
+            tutor: true,
+            student: {
+                select: {
+                    name: true,
+                    email: true
+                }
+            }
+        }
+    });
+
+    return result;
+}
+
 export const bookingService = {
     createBooking,
-    getAllBookings
+    getAllBookings,
+    getSingleBooking
 }

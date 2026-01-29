@@ -43,7 +43,26 @@ const getAllBooking = async (req: Request, res: Response) => {
     }
 }
 
+const getSingleBooking = async (req: Request, res: Response) => {
+    try {
+        const { bookingId } = req.params;
+        const result = await bookingService.getSingleBooking(bookingId as string)
+        res.status(200).json({
+            success: true,
+            message: "Booking details fetch successfully",
+            data: result
+        });
+    } catch (e: any) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch booking details",
+            error: e
+        });
+    }
+}
+
 export const bookingsController = {
     createBooking,
-    getAllBooking
+    getAllBooking,
+    getSingleBooking
 }
