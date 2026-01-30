@@ -4,7 +4,9 @@ import { bookingsController } from "./bookings.controller";
 
 const router = express.Router()
 
-router.get("/", auth(UserRole.TUTOR, UserRole.STUDENT), bookingsController.getAllBooking);
+router.get("/", auth(UserRole.ADMIN), bookingsController.getAllBooking);
+router.get("/:userId", auth(UserRole.STUDENT, UserRole.TUTOR), bookingsController.getMyBooking);
+
 router.get("/:bookingId", auth(UserRole.TUTOR, UserRole.STUDENT), bookingsController.getSingleBooking);
 
 router.post("/:tutorId", auth(UserRole.STUDENT, UserRole.TUTOR), bookingsController.createBooking);

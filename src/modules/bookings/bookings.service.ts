@@ -1,4 +1,4 @@
-import { BookingStatus } from "../../../generated/prisma/enums";
+import { BookingStatus, UserRole } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 
 const createBooking = async (studentUserId: string, tutorUserId: string, payload: { startTime: string, endTime: string }) => {
@@ -86,8 +86,32 @@ const getSingleBooking = async (id: string) => {
     return result;
 }
 
+const getMyBooking = async (userId: string, role: string) => {
+    let whereCondition: any = {}
+
+    if (role === UserRole.STUDENT) {
+        whereCondition = { studentId: userId };
+    } else if (role === UserRole.TUTOR) {
+        whereCondition = { tutorId: userId };
+    }
+
+    const result = await prisma.booking.findMany({
+        where: whereCondition,
+        include: {
+            tutor: true,
+            student: true
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+
+    return result
+}
+
 export const bookingService = {
     createBooking,
     getAllBookings,
-    getSingleBooking
+    getSingleBooking,
+    getMyBooking
 }
