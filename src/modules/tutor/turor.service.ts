@@ -55,7 +55,15 @@ const createTuror = async (data: any, id: string) => {
     });
 }
 
-const getAllTutors = async () => {
+const getAllTutors = async (search: string) => {
+    let andConditions = []
+    if (search) {
+        andConditions.push({
+            search: {
+                equal: search
+            }
+        })
+    }
     const result = await prisma.tutorProfile.findMany();
     return result
 }
@@ -94,11 +102,32 @@ const updateTutorProfile = async (userId: string, data: any) => {
     return result;
 }
 
+const updateTutorAvailability = async (userId: string, data: any) => {
+    const { availability } = data;
+    const isTutorExist = await prisma.tutorProfile.findUnique({
+        where: { userId }
+    });
+
+    if (!isTutorExist) {
+        throw new Error("Tutor profile not found! Please create one first.");
+    }
+
+    const result = await prisma.tutorProfile.update({
+        where: { userId },
+        data: {
+            availability: availability,
+        }
+    });
+
+    return result;
+}
+
 
 
 export const tutorService = {
     createTuror,
     getAllTutors,
     getSingleTutor,
-    updateTutorProfile
+    updateTutorProfile,
+    updateTutorAvailability
 }

@@ -28,7 +28,9 @@ const createTuror = async (req: Request, res: Response) => {
 
 const getAllTutors = async (req: Request, res: Response) => {
     try {
-        const result = await tutorService.getAllTutors()
+        const { search } = req.query;
+        console.log(search);
+        const result = await tutorService.getAllTutors(search as string)
         res.status(200).json({
             success: true,
             message: "Tutor fetch successfully",
@@ -89,10 +91,36 @@ const updateTutorProfile = async (req: Request, res: Response) => {
 }
 
 
+const updateTutorAvailability = async (req: Request, res: Response) => {
+    try {
+        const { tutorId } = req.params;
+        console.log(tutorId)
+        if (!tutorId) {
+            throw new Error("Tutor is not found!!!")
+        }
+        const data = req.body;
+        console.log(data)
+        const result = await tutorService.updateTutorProfile(tutorId as string, data)
+        res.status(200).json({
+            success: true,
+            message: "Tutor Availability update successfully",
+            data: result
+        });
+    } catch (e: any) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to update tutors Availability",
+            error: e
+        });
+    }
+}
+
+
 
 export const tutroController = {
     createTuror,
     getAllTutors,
     getSingleTutor,
-    updateTutorProfile
+    updateTutorProfile,
+    updateTutorAvailability
 }
