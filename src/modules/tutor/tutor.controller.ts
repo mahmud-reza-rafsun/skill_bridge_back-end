@@ -47,7 +47,7 @@ const getSingleTutor = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
         if (!userId) {
-            throw new Error("Tutor id not found!!!")
+            throw new Error("Tutor is not found!!!")
         }
         const result = await tutorService.getSingleTutor(userId as string)
         res.status(200).json({
@@ -64,8 +64,35 @@ const getSingleTutor = async (req: Request, res: Response) => {
     }
 }
 
+const updateTutorProfile = async (req: Request, res: Response) => {
+    try {
+        const { tutorId } = req.params;
+        console.log(tutorId)
+        if (!tutorId) {
+            throw new Error("Tutor is not found!!!")
+        }
+        const data = req.body;
+        console.log(data)
+        const result = await tutorService.updateTutorProfile(tutorId as string, data)
+        res.status(200).json({
+            success: true,
+            message: "Tutor details update successfully",
+            data: result
+        });
+    } catch (e: any) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to update tutors details",
+            error: e
+        });
+    }
+}
+
+
+
 export const tutroController = {
     createTuror,
     getAllTutors,
     getSingleTutor,
+    updateTutorProfile
 }
