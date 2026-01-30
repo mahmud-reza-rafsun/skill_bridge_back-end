@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx tsx watch src/server.ts",
-    "build": "prisma generate && tsc",
-    "vercel-build": "prisma generate",
-    "start": "node dist/server.js"
+    "dev": "npx tsx watch src/server.ts"
   },
   "keywords": [],
   "author": "",

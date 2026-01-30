@@ -21,7 +21,6 @@ const getAllUser = async (req: Request, res: Response) => {
 const updateUserStatus = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        console.log(id)
         const { status } = req.body;
 
         const result = await adminService.updateUserStatus(id as string, status);

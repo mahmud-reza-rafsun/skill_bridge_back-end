@@ -9,6 +9,6 @@ router.get("/:userId", auth(UserRole.STUDENT, UserRole.TUTOR), bookingsControlle
 
 router.get("/:bookingId", auth(UserRole.TUTOR, UserRole.STUDENT), bookingsController.getSingleBooking);
 
-router.post("/:tutorId", auth(UserRole.STUDENT, UserRole.TUTOR), bookingsController.createBooking);
+router.post("/:tutorId", auth(UserRole.STUDENT, UserRole.TUTOR,), bookingsController.createBooking);
 
 export const bookingRouter: Router = router;

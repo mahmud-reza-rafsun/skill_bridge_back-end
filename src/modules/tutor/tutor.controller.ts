@@ -29,7 +29,6 @@ const createTuror = async (req: Request, res: Response) => {
 const getAllTutors = async (req: Request, res: Response) => {
     try {
         const { search } = req.query;
-        console.log(search);
         const result = await tutorService.getAllTutors(search as string)
         res.status(200).json({
             success: true,
@@ -69,12 +68,10 @@ const getSingleTutor = async (req: Request, res: Response) => {
 const updateTutorProfile = async (req: Request, res: Response) => {
     try {
         const { tutorId } = req.params;
-        console.log(tutorId)
         if (!tutorId) {
             throw new Error("Tutor is not found!!!")
         }
         const data = req.body;
-        console.log(data)
         const result = await tutorService.updateTutorProfile(tutorId as string, data)
         res.status(200).json({
             success: true,
@@ -94,12 +91,10 @@ const updateTutorProfile = async (req: Request, res: Response) => {
 const updateTutorAvailability = async (req: Request, res: Response) => {
     try {
         const { tutorId } = req.params;
-        console.log(tutorId)
         if (!tutorId) {
             throw new Error("Tutor is not found!!!")
         }
         const data = req.body;
-        console.log(data)
         const result = await tutorService.updateTutorProfile(tutorId as string, data)
         res.status(200).json({
             success: true,

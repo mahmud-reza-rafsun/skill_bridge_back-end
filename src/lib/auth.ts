@@ -117,10 +117,7 @@ export const auth = betterAuth({
                         `
 
                 });
-
-                console.log("Message sent:", info.messageId);
             } catch (err) {
-                console.log(err)
                 throw err
             }
         },

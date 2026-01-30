@@ -3,7 +3,6 @@ import { prisma } from "../../lib/prisma"
 
 const createTuror = async (data: any, id: string) => {
     const { categoryName, bio, hourlyRate, availability, subject } = data;
-    console.log(id)
     return prisma.$transaction(async (tx) => {
 
         const existingProfile = await tx.tutorProfile.findUnique({

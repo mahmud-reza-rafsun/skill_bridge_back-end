@@ -39,8 +39,6 @@ const updateTutorCategory = async (req: Request, res: Response) => {
         const { id } = req.params;
         const { categoryName } = req.body;
 
-        console.log(id)
-        console.log(categoryName)
         const result = await categoryService.updateTutorCategory(id as string, categoryName)
         res.status(200).json({
             success: true,
