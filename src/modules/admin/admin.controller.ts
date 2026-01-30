@@ -35,8 +35,22 @@ const updateUserStatus = async (req: Request, res: Response) => {
     }
 };
 
+const getStats = async (req: Request, res: Response) => {
+    try {
+        const result = await adminService.getAdminStats();
+        res.status(200).json({
+            success: true,
+            message: "Dashboard statistics retrieved successfully",
+            data: result
+        });
+    } catch (e: any) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+};
+
 
 export const adminController = {
     getAllUser,
-    updateUserStatus
+    updateUserStatus,
+    getStats
 }

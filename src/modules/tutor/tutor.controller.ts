@@ -115,12 +115,34 @@ const updateTutorAvailability = async (req: Request, res: Response) => {
     }
 }
 
+const getTutorDashboard = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        const result = await tutorService.getTutorDashboardData(userId as string);
+
+        res.status(200).json({
+            success: true,
+            message: "Tutor dashboard data retrieved successfully",
+            data: result
+        });
+    } catch (e: any) {
+        console.error("Dashboard Error:", e);
+        res.status(500).json({
+            success: false,
+            message: e.message || "Failed to fetch dashboard data",
+            error: e.message
+        });
+    }
+};
 
 
-export const tutroController = {
+
+
+export const tutorController = {
     createTuror,
     getAllTutors,
     getSingleTutor,
     updateTutorProfile,
-    updateTutorAvailability
+    updateTutorAvailability,
+    getTutorDashboard
 }

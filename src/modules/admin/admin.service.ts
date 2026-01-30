@@ -35,8 +35,32 @@ const updateUserStatus = async (id: string, status: string) => {
     return result
 }
 
+const getAdminStats = async () => {
+    const [totalUsers, totalStudents, totalTutors, totalBookings, totalReviews] = await Promise.all([
+        prisma.user.count(),
+        prisma.user.count({ where: { role: 'STUDENT' } }),
+        prisma.user.count({ where: { role: 'TUTOR' } }),
+        prisma.booking.count(),
+        prisma.review.count()
+    ]);
+    const totalEarnings = await prisma.booking.aggregate({
+        _sum: {
+            totalAmmount: true
+        }
+    });
+
+    return {
+        totalUsers,
+        totalStudents,
+        totalTutors,
+        totalBookings,
+        totalReviews,
+        totalRevenue: totalEarnings._sum.totalAmmount || 0
+    };
+};
 
 export const adminService = {
     getAllUser,
-    updateUserStatus
+    updateUserStatus,
+    getAdminStats
 }

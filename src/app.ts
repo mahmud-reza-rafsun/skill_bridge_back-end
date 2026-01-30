@@ -25,7 +25,7 @@ app.use("/api/categories", categoryRouter)
 app.use("/api/tutors", tutroRouter)
 app.use("/api/bookings", bookingRouter)
 app.use("/api/reviews", ReviewRouter)
-app.use("/api/admin/users", AdminRouter)
+app.use("/api/admin", AdminRouter)
 
 app.get("/", (req, res) => {
     res.send("Skill Bridge");

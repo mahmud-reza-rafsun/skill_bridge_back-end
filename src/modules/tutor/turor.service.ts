@@ -1,5 +1,4 @@
-import { TutorProfile } from "../../../generated/prisma/client";
-import { UserRole } from "../../../generated/prisma/enums";
+import { BookingStatus, UserRole } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma"
 
 const createTuror = async (data: any, id: string) => {
@@ -122,12 +121,48 @@ const updateTutorAvailability = async (userId: string, data: any) => {
     return result;
 }
 
+const getTutorDashboardData = async (userId: string) => {
+    const tutorProfile = await prisma.tutorProfile.findUnique({
+        where: { userId }
+    });
 
+    if (!tutorProfile) throw new Error("Tutor profile not found!");
+
+    const [totalSessions, pendingSessions, reviews, upcomingSessions] = await Promise.all([
+        prisma.booking.count({ where: { tutorId: tutorProfile.userId } }),
+        prisma.booking.count({ where: { tutorId: tutorProfile.userId, status: BookingStatus.PENDING } }),
+        prisma.review.aggregate({
+            where: { tutorId: tutorProfile.userId },
+            _avg: { rating: true },
+            _count: true
+        }),
+
+        prisma.booking.findMany({
+            where: { tutorId: tutorProfile.userId, status: BookingStatus.CONFIRMED },
+            take: 5,
+            include: {
+                student: { select: { name: true, email: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+    ]);
+
+    return {
+        stats: {
+            totalSessions,
+            pendingSessions,
+            totalReviews: reviews._count,
+            averageRating: reviews._avg.rating || 0
+        },
+        upcomingSessions
+    };
+};
 
 export const tutorService = {
     createTuror,
     getAllTutors,
     getSingleTutor,
     updateTutorProfile,
-    updateTutorAvailability
+    updateTutorAvailability,
+    getTutorDashboardData
 }

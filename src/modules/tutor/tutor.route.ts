@@ -1,14 +1,17 @@
 import express, { Router } from "express"
 import auth, { UserRole } from "../middleware/auth";
-import { tutroController } from "./tutor.controller";
+import { tutorController } from "./tutor.controller";
 
 const router = express.Router()
 
-router.get("/", auth(UserRole.STUDENT, UserRole.ADMIN, UserRole.TUTOR), tutroController.getAllTutors);
-router.get("/:userId", auth(UserRole.STUDENT, UserRole.ADMIN, UserRole.TUTOR), tutroController.getSingleTutor);
+router.get("/", auth(UserRole.STUDENT, UserRole.ADMIN, UserRole.TUTOR), tutorController.getAllTutors);
+router.get("/dashboard", auth(UserRole.ADMIN, UserRole.TUTOR), tutorController.getTutorDashboard);
+router.get("/:userId", auth(UserRole.STUDENT, UserRole.ADMIN, UserRole.TUTOR), tutorController.getSingleTutor);
 
-router.post("/", auth(UserRole.STUDENT, UserRole.ADMIN), tutroController.createTuror);
-router.put("/profile/:tutorId", auth(UserRole.TUTOR, UserRole.ADMIN), tutroController.updateTutorProfile);
-router.put("/availability/:tutorId", auth(UserRole.TUTOR, UserRole.ADMIN), tutroController.updateTutorAvailability);
+
+router.post("/", auth(UserRole.STUDENT, UserRole.ADMIN), tutorController.createTuror);
+
+router.put("/availability/:tutorId", auth(UserRole.TUTOR, UserRole.ADMIN), tutorController.updateTutorAvailability);
+router.put("/profile/:tutorId", auth(UserRole.TUTOR, UserRole.ADMIN), tutorController.updateTutorProfile);
 
 export const tutroRouter: Router = router;
