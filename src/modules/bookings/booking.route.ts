@@ -7,6 +7,6 @@ const router = express.Router()
 router.get("/", auth(UserRole.TUTOR, UserRole.STUDENT), bookingsController.getAllBooking);
 router.get("/:bookingId", auth(UserRole.TUTOR, UserRole.STUDENT), bookingsController.getSingleBooking);
 
-router.post("/:tutorId", auth(UserRole.STUDENT), bookingsController.createBooking);
+router.post("/:tutorId", auth(UserRole.STUDENT, UserRole.TUTOR), bookingsController.createBooking);
 
 export const bookingRouter: Router = router;
