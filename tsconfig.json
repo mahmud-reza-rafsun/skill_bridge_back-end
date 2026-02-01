@@ -18,5 +18,13 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  "include": [
+    "src/**/*",
+    "prisma.config.ts" // Ekhon eta root-e thakle ar somossya korbe na
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

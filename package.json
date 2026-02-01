@@ -2,10 +2,12 @@
   "name": "skill_bridge_back-end",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/server.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx tsx watch src/server.ts"
+    "dev": "npx tsx watch src/server.ts",
+    "build": "prisma generate && tsup",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +31,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "nodemailer": "^7.0.13",
-    "pg": "^8.17.2"
+    "pg": "^8.17.2",
+    "tsup": "^8.5.1"
   }
 }
