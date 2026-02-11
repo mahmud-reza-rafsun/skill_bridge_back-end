@@ -20,7 +20,24 @@ export const auth = betterAuth({
     }),
     baseURL: process.env.BETTER_AUTH_URL,
     trustedOrigins: [process.env.APP_URL || "http://localhost:3000"],
+    cookies: {
+        sessionToken: {
+            options: {
+                httpOnly: true,
+                // Development এ secure false রাখতে হবে কারণ লোকালহোস্ট http হয়
+                secure: process.env.NODE_ENV === "production",
+                // Development এ 'lax' ব্যবহার করা ভালো
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+                path: "/",
+                maxAge: 60 * 60 * 24 * 7,
+            },
+        },
+    },
+
     user: {
+        fields: {
+            emailVerified: "emailVerified",
+        },
         additionalFields: {
             role: {
                 type: "string",

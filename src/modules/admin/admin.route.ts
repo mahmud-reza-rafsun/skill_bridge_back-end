@@ -6,6 +6,7 @@ const router = express.Router()
 
 router.get("/users", auth(UserRole.ADMIN), adminController.getAllUser);
 router.get("/stats", auth(UserRole.ADMIN), adminController.getStats);
+router.get("/get-all-booking", auth(UserRole.ADMIN), adminController.getAllBookings);
 
 router.patch("/:id", auth(UserRole.ADMIN), adminController.updateUserStatus);
 

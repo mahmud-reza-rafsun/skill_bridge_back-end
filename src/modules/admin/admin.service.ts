@@ -59,8 +59,39 @@ const getAdminStats = async () => {
     };
 };
 
+export const getAllBookingsFromDB = async () => {
+    const result = await prisma.booking.findMany({
+        select: {
+            id: true,
+            status: true,
+            totalAmmount: true,
+            student: {
+                select: {
+                    name: true,
+                    email: true,
+                }
+            },
+            tutor: {
+                select: {
+                    user: {
+                        select: {
+                            name: true,
+                        }
+                    },
+                    subject: true,
+                }
+            }
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+    return result;
+};
+
 export const adminService = {
     getAllUser,
     updateUserStatus,
-    getAdminStats
+    getAdminStats,
+    getAllBookingsFromDB
 }

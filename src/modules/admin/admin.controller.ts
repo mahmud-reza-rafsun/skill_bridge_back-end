@@ -47,9 +47,26 @@ const getStats = async (req: Request, res: Response) => {
     }
 };
 
+export const getAllBookings = async (req: Request, res: Response) => {
+    try {
+        const bookings = await adminService.getAllBookingsFromDB();
+
+        res.status(200).json({
+            success: true,
+            message: "All bookings fetched successfully",
+            data: bookings,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message || "Something went wrong",
+        });
+    }
+};
 
 export const adminController = {
     getAllUser,
     updateUserStatus,
-    getStats
+    getStats,
+    getAllBookings
 }
