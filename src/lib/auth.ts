@@ -24,9 +24,7 @@ export const auth = betterAuth({
         sessionToken: {
             options: {
                 httpOnly: true,
-                // Development এ secure false রাখতে হবে কারণ লোকালহোস্ট http হয়
                 secure: process.env.NODE_ENV === "production",
-                // Development এ 'lax' ব্যবহার করা ভালো
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
                 path: "/",
                 maxAge: 60 * 60 * 24 * 7,
