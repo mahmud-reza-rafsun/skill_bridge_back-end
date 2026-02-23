@@ -7,3 +7,5 @@ build
 .vercel
 .env*.local
 api
+.vercel
+.env*.local
