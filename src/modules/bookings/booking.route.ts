@@ -1,5 +1,5 @@
 import express, { Router } from "express"
-import auth, { UserRole } from "../middleware/auth";
+import auth, { UserRole } from "../../middleware/auth";
 import { bookingsController } from "./bookings.controller";
 
 const router = express.Router()

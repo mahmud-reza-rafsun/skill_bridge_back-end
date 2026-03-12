@@ -1,5 +1,5 @@
 import express, { Router } from "express"
-import auth, { UserRole } from "../middleware/auth";
+import auth, { UserRole } from "../../middleware/auth";
 import { adminController } from "./admin.controller";
 
 const router = express.Router()

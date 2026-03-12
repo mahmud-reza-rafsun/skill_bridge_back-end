@@ -43,6 +43,11 @@ export const auth = betterAuth({
                 type: "string",
                 defaultValue: "ACTIVE",
                 required: false
+            },
+            emailVerified: {
+                type: "boolean",
+                defaultValue: true,
+                required: true
             }
         }
     },
@@ -64,5 +69,19 @@ export const auth = betterAuth({
             clientId: process.env.GOOGLE_CLIENT_ID as string,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
         }
-    }
+    },
+    databaseHooks: {
+        user: {
+            create: {
+                before: async (user) => {
+                    return {
+                        data: {
+                            ...user,
+                            emailVerified: true,
+                        },
+                    };
+                },
+            },
+        },
+    },
 });

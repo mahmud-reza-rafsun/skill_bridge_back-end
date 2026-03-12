@@ -130,7 +130,27 @@ const getTutorDashboard = async (req: Request, res: Response) => {
     }
 };
 
+const getMyStudentsList = async (req: Request, res: Response) => {
+    try {
+        const tutorId = req.user?.id;
+        if (!tutorId) {
+            throw new Error("Unauthorized access! Tutor ID is missing.");
+        }
 
+        const result = await tutorService.getMyStudentsList(tutorId as string);
+
+        res.status(200).json({
+            success: true,
+            message: "Student list retrieved successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to fetch student list",
+        });
+    }
+};
 
 
 export const tutorController = {
@@ -139,5 +159,6 @@ export const tutorController = {
     getSingleTutor,
     updateTutorProfile,
     updateTutorAvailability,
-    getTutorDashboard
+    getTutorDashboard,
+    getMyStudentsList
 }
