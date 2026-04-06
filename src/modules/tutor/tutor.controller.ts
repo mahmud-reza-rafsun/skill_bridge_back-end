@@ -1,164 +1,69 @@
 import { Request, Response } from "express";
 import { tutorService } from "./turor.service";
 
-const createTuror = async (req: Request, res: Response) => {
+const createTutor = async (req: Request, res: Response) => {
     try {
-        const user = req.user;
-        if (!user) {
-            return res.status(400).json({
-                error: "Unauthorized!",
-            })
-        }
-        const id = user.id;
-        const data = req.body;
-        const result = await tutorService.createTuror(data, id as string)
-        res.status(200).json({
-            success: true,
-            message: "Tutor create successfully",
-            data: result
-        });
+        const userId = req.user?.id;
+        const result = await tutorService.createTutor(req.body, userId as string);
+        res.status(201).json({ success: true, message: "Tutor profile created successfully", data: result });
     } catch (e: any) {
-        res.status(400).json({
-            error: "Turtor creation failed",
-            message: e.message,
-            details: e
-        })
+        res.status(400).json({ success: false, message: e.message });
     }
-}
+};
 
 const getAllTutors = async (req: Request, res: Response) => {
     try {
         const { search } = req.query;
-        const result = await tutorService.getAllTutors(search as string)
-        res.status(200).json({
-            success: true,
-            message: "Tutor fetch successfully",
-            data: result
-        });
+        const result = await tutorService.getAllTutors(search as string);
+        res.status(200).json({ success: true, message: "Tutors fetched successfully", data: result });
     } catch (e: any) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch tutors",
-            error: e
-        });
+        res.status(500).json({ success: false, message: e.message });
     }
-}
+};
 
 const getSingleTutor = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
-        if (!userId) {
-            throw new Error("Tutor is not found!!!")
-        }
-        const result = await tutorService.getSingleTutor(userId as string)
-        res.status(200).json({
-            success: true,
-            message: "Tutor details fetch successfully",
-            data: result
-        });
+        const result = await tutorService.getSingleTutor(userId as string);
+        res.status(200).json({ success: true, data: result });
     } catch (e: any) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch tutors details",
-            error: e
-        });
-    }
-}
-
-const updateTutorProfile = async (req: Request, res: Response) => {
-    try {
-        const { tutorId } = req.params;
-        if (!tutorId) {
-            throw new Error("Tutor is not found!!!")
-        }
-        const data = req.body;
-        const result = await tutorService.updateTutorProfile(tutorId as string, data)
-        res.status(200).json({
-            success: true,
-            message: "Tutor details update successfully",
-            data: result
-        });
-    } catch (e: any) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to update tutors details",
-            error: e
-        });
-    }
-}
-
-
-const updateTutorAvailability = async (req: Request, res: Response) => {
-    try {
-        const { tutorId } = req.params;
-        if (!tutorId) {
-            throw new Error("Tutor is not found!!!")
-        }
-        const data = req.body;
-        const result = await tutorService.updateTutorProfile(tutorId as string, data)
-        res.status(200).json({
-            success: true,
-            message: "Tutor Availability update successfully",
-            data: result
-        });
-    } catch (e: any) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to update tutors Availability",
-            error: e
-        });
-    }
-}
-
-const getTutorDashboard = async (req: Request, res: Response) => {
-    try {
-        const userId = req.user?.id;
-        const result = await tutorService.getTutorDashboardData(userId as string);
-
-        res.status(200).json({
-            success: true,
-            message: "Tutor dashboard data retrieved successfully",
-            data: result
-        });
-    } catch (e: any) {
-        console.error("Dashboard Error:", e);
-        res.status(500).json({
-            success: false,
-            message: e.message || "Failed to fetch dashboard data",
-            error: e.message
-        });
+        res.status(404).json({ success: false, message: e.message });
     }
 };
 
-const getMyStudentsList = async (req: Request, res: Response) => {
+const updateProfile = async (req: Request, res: Response) => {
     try {
-        const tutorId = req.user?.id;
-        if (!tutorId) {
-            throw new Error("Unauthorized access! Tutor ID is missing.");
-        }
-
-        const result = await tutorService.getMyStudentsList(tutorId as string);
-
-        res.status(200).json({
-            success: true,
-            message: "Student list retrieved successfully",
-            data: result,
-        });
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: error.message || "Failed to fetch student list",
-        });
+        const userId = req.user?.id; // Using logged in user's ID for security
+        const result = await tutorService.updateTutorProfile(userId as string, req.body);
+        res.status(200).json({ success: true, message: "Profile updated successfully", data: result });
+    } catch (e: any) {
+        res.status(400).json({ success: false, message: e.message });
     }
 };
 
+const getDashboard = async (req: Request, res: Response) => {
+    try {
+        const result = await tutorService.getTutorDashboardData(req.user?.id as string);
+        res.status(200).json({ success: true, data: result });
+    } catch (e: any) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+};
+
+const getStudents = async (req: Request, res: Response) => {
+    try {
+        const result = await tutorService.getMyStudentsList(req.user?.id as string);
+        res.status(200).json({ success: true, data: result });
+    } catch (e: any) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+};
 
 export const tutorController = {
-    createTuror,
+    createTutor,
     getAllTutors,
     getSingleTutor,
-    updateTutorProfile,
-    updateTutorAvailability,
-    getTutorDashboard,
-    getMyStudentsList
-}
+    updateProfile,
+    getDashboard,
+    getStudents
+};

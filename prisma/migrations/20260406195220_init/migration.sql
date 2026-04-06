@@ -1,27 +1,25 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('STUDENT', 'TUTOR', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "BookingStatus" AS ENUM ('CONFIRMED', 'COMPLETED', 'CANCELLED');
+CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'BLOCKED');
 
--- DropTable
-DROP TABLE "Post";
+-- CreateEnum
+CREATE TYPE "BookingStatus" AS ENUM ('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED');
 
 -- CreateTable
 CREATE TABLE "user" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "emailVerified" BOOLEAN NOT NULL DEFAULT true,
     "image" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "role" TEXT DEFAULT 'STUDENT',
+    "phone" TEXT,
+    "status" TEXT DEFAULT 'ACTIVE',
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -72,24 +70,24 @@ CREATE TABLE "verification" (
 );
 
 -- CreateTable
-CREATE TABLE "category" (
+CREATE TABLE "tutor_profile" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
+    "bio" TEXT NOT NULL,
+    "subject" TEXT NOT NULL,
+    "hourlyRate" DOUBLE PRECISION NOT NULL,
+    "availability" TEXT NOT NULL,
+    "categoryName" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
 
-    CONSTRAINT "category_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "tutor_profile_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "tutor_profile" (
+CREATE TABLE "category" (
     "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "categoryId" TEXT NOT NULL,
-    "bio" TEXT NOT NULL,
-    "hourlyRate" DOUBLE PRECISION NOT NULL,
-    "availability" JSONB NOT NULL,
+    "name" TEXT NOT NULL,
 
-    CONSTRAINT "tutor_profile_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "category_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -97,7 +95,8 @@ CREATE TABLE "booking" (
     "id" TEXT NOT NULL,
     "startTime" TIMESTAMP(3) NOT NULL,
     "endTime" TIMESTAMP(3) NOT NULL,
-    "status" "BookingStatus" NOT NULL DEFAULT 'CONFIRMED',
+    "totalAmmount" DOUBLE PRECISION NOT NULL,
+    "status" "BookingStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "studentId" TEXT NOT NULL,
     "tutorId" TEXT NOT NULL,
@@ -109,7 +108,7 @@ CREATE TABLE "booking" (
 CREATE TABLE "review" (
     "id" TEXT NOT NULL,
     "rating" INTEGER NOT NULL,
-    "comment" TEXT,
+    "comment" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "studentId" TEXT NOT NULL,
     "tutorId" TEXT NOT NULL,
@@ -134,13 +133,10 @@ CREATE INDEX "account_userId_idx" ON "account"("userId");
 CREATE INDEX "verification_identifier_idx" ON "verification"("identifier");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "category_name_key" ON "category"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "category_slug_key" ON "category"("slug");
-
--- CreateIndex
 CREATE UNIQUE INDEX "tutor_profile_userId_key" ON "tutor_profile"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "category_name_key" ON "category"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "review_bookingId_key" ON "review"("bookingId");
@@ -152,10 +148,7 @@ ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tutor_profile" ADD CONSTRAINT "tutor_profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "tutor_profile" ADD CONSTRAINT "tutor_profile_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "tutor_profile" ADD CONSTRAINT "tutor_profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "booking" ADD CONSTRAINT "booking_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

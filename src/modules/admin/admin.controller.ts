@@ -4,29 +4,30 @@ import { adminService } from "./admin.service";
 const getAllUser = async (req: Request, res: Response) => {
     try {
         const result = await adminService.getAllUser();
-
-        res.status(200).json({
-            success: true,
-            message: "Users retrieved successfully",
-            data: result
-        });
+        res.status(200).json({ success: true, message: "Users fetched", data: result });
     } catch (e: any) {
-        res.status(400).json({
-            error: "Users retrieved failed",
-            message: e.message
-        });
+        res.status(400).json({ success: false, message: e.message });
     }
 };
 
-const updateUserStatus = async (req: Request, res: Response) => {
+const blockUser = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
+        const result = await adminService.blockAndUnblockUser(id as string, status);
+        res.status(200).json({ success: true, message: `Status: ${status}`, data: result });
+    } catch (e: any) {
+        res.status(400).json({ success: false, message: e.message });
+    }
+};
 
-        const result = await adminService.updateUserStatus(id as string, status);
+const deleteToggle = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const result = await adminService.toggleUserDelete(id as string);
         res.status(200).json({
             success: true,
-            message: `User is now ${status}`,
+            message: result.isDeleted ? "User soft deleted" : "User restored",
             data: result
         });
     } catch (e: any) {
@@ -37,36 +38,25 @@ const updateUserStatus = async (req: Request, res: Response) => {
 const getStats = async (req: Request, res: Response) => {
     try {
         const result = await adminService.getAdminStats();
-        res.status(200).json({
-            success: true,
-            message: "Dashboard statistics retrieved successfully",
-            data: result
-        });
+        res.status(200).json({ success: true, data: result });
     } catch (e: any) {
         res.status(500).json({ success: false, message: e.message });
     }
 };
 
-export const getAllBookings = async (req: Request, res: Response) => {
+const getAllBookings = async (req: Request, res: Response) => {
     try {
-        const bookings = await adminService.getAllBookingsFromDB();
-
-        res.status(200).json({
-            success: true,
-            message: "All bookings fetched successfully",
-            data: bookings,
-        });
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: error.message || "Something went wrong",
-        });
+        const result = await adminService.getAllBookingsFromDB();
+        res.status(200).json({ success: true, data: result });
+    } catch (e: any) {
+        res.status(500).json({ success: false, message: e.message });
     }
 };
 
 export const adminController = {
     getAllUser,
-    updateUserStatus,
+    blockUser,
     getStats,
-    getAllBookings
-}
+    getAllBookings,
+    deleteToggle
+};

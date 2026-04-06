@@ -1,88 +1,95 @@
 import { Request, Response } from "express";
 import { bookingService } from "./bookings.service";
+import { BookingStatus } from "../../../generated/prisma/enums";
 
 const createBooking = async (req: Request, res: Response) => {
     try {
-        const data = req.body
-        const user = req.user
-        if (!user) {
-            return res.status(400).json({
-                error: "Unauthorized!",
-            })
-        }
-        const { tutorId } = req.params
-        const result = await bookingService.createBooking(user.id as string, tutorId as string, data)
-        res.status(200).json({
+        const { tutorId } = req.params;
+        const studentId = req.user?.id;
+
+        const result = await bookingService.createBooking(
+            studentId as string,
+            tutorId as string,
+            req.body
+        );
+
+        res.status(201).json({
             success: true,
-            message: "Booking create successfully",
+            message: "Booking created successfully",
             data: result
         });
     } catch (e: any) {
-        res.status(400).json({
-            error: "Booking creation failed",
-            message: e.message,
-            details: e
-        })
+        res.status(400).json({ success: false, message: e.message });
     }
-}
+};
 
 const getAllBooking = async (req: Request, res: Response) => {
     try {
-        const result = await bookingService.getAllBookings()
+        const result = await bookingService.getAllBookings();
         res.status(200).json({
             success: true,
-            message: "Bookings fetch successfully",
+            message: "All bookings retrieved successfully",
             data: result
         });
     } catch (e: any) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch Bookings",
-            error: e
-        });
+        res.status(500).json({ success: false, message: e.message });
     }
-}
+};
 
 const getSingleBooking = async (req: Request, res: Response) => {
     try {
         const { bookingId } = req.params;
-        const result = await bookingService.getSingleBooking(bookingId as string)
+        const result = await bookingService.getSingleBooking(bookingId as string);
         res.status(200).json({
             success: true,
-            message: "Booking details fetch successfully",
+            message: "Booking details retrieved successfully",
             data: result
         });
     } catch (e: any) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch booking details",
-            error: e
-        });
+        res.status(404).json({ success: false, message: e.message });
     }
-}
+};
 
 const getMyBooking = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        const role = req.user?.role
-        const result = await bookingService.getMyBooking(userId as string, role as string)
+        const role = req.user?.role;
+        const result = await bookingService.getMyBooking(userId as string, role as string);
+
         res.status(200).json({
             success: true,
-            message: "My booking details fetch successfully",
+            message: "My bookings retrieved successfully",
             data: result
         });
     } catch (e: any) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch booking details",
-            error: e
-        });
+        res.status(500).json({ success: false, message: e.message });
     }
-}
+};
+
+const updateStatus = async (req: Request, res: Response) => {
+    try {
+        const { bookingId } = req.params;
+        const { status } = req.body;
+
+        const result = await bookingService.updateBookingStatus(
+            bookingId as string,
+            status as BookingStatus
+        );
+
+        res.status(200).json({
+            success: true,
+            message: `Booking status updated to ${status}`,
+            data: result
+        });
+    } catch (e: any) {
+        res.status(400).json({ success: false, message: e.message });
+    }
+};
 
 export const bookingsController = {
     createBooking,
+    getMyBooking,
+    updateStatus,
     getAllBooking,
-    getSingleBooking,
-    getMyBooking
-}
+    getSingleBooking
+};

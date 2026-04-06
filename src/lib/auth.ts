@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
+import { UserRole, UserStatus } from "../../generated/prisma";
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
@@ -23,7 +24,12 @@ export const auth = betterAuth({
         },
         disableCSRFCheck: true,
     },
-
+    cookie: {
+        attributes: {
+            sameSite: "none",
+            secure: true,
+        },
+    },
 
     user: {
         fields: {
@@ -32,22 +38,22 @@ export const auth = betterAuth({
         additionalFields: {
             role: {
                 type: "string",
-                defaultValue: "STUDENT",
-                required: false
+                required: false,
+                defaultValue: UserRole.STUDENT,
+            },
+            status: {
+                type: "string",
+                required: false,
+                defaultValue: "ACTIVE",
+            },
+            isDeleted: {
+                type: "boolean",
+                required: false,
+                defaultValue: false,
             },
             phone: {
                 type: "string",
                 required: false
-            },
-            status: {
-                type: "string",
-                defaultValue: "ACTIVE",
-                required: false
-            },
-            emailVerified: {
-                type: "boolean",
-                defaultValue: true,
-                required: true
             }
         }
     },
@@ -70,6 +76,7 @@ export const auth = betterAuth({
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
         }
     },
+
     databaseHooks: {
         user: {
             create: {
@@ -78,6 +85,8 @@ export const auth = betterAuth({
                         data: {
                             ...user,
                             emailVerified: true,
+                            status: UserStatus.ACTIVE,
+                            isDeleted: false,
                         },
                     };
                 },

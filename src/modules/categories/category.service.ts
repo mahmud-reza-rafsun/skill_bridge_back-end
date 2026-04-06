@@ -1,42 +1,38 @@
-import { Prisma } from "../../../generated/prisma/browser";
-import { prisma } from "../../lib/prisma"
+import { prisma } from "../../lib/prisma";
 
-const createCategory = async (data: Prisma.CategoryCreateInput) => {
-    const result = await prisma.category.create({
+const createCategory = async (data: { name: string }) => {
+    return await prisma.category.create({
         data
     });
-
-    return result;
 };
 
 const getAllCategory = async () => {
-    const result = await prisma.category.findMany()
-    return result;
-}
+    return await prisma.category.findMany({
+        orderBy: {
+            name: 'asc'
+        }
+    });
+};
 
-const updateTutorCategory = async (id: string, categoryName: any) => {
-    const isExistCategory = await prisma.category.findUnique({
+const updateTutorCategory = async (userId: string, categoryName: string) => {
+    // Checking if the category exists before updating
+    const categoryExists = await prisma.category.findUnique({
         where: { name: categoryName }
     });
 
-    if (!isExistCategory) {
-        throw new Error("Category not found");
+    if (!categoryExists) {
+        throw new Error("Category does not exist!");
     }
 
-    const result = await prisma.tutorProfile.update({
-        where: { userId: id },
-        data: {
-            categoryName: categoryName
-        }
+    // Updating the categoryName in TutorProfile using userId
+    return await prisma.tutorProfile.update({
+        where: { userId },
+        data: { categoryName }
     });
-
-    return result;
-}
-
-
+};
 
 export const categoryService = {
     createCategory,
     getAllCategory,
     updateTutorCategory
-}
+};

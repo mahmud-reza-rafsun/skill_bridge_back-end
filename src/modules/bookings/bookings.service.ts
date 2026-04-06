@@ -1,17 +1,18 @@
-import { BookingStatus, UserRole } from "../../../generated/prisma/enums";
+import { BookingStatus, UserRole } from "../../../generated/prisma";
 import { prisma } from "../../lib/prisma";
 
-const createBooking = async (studentUserId: string, tutorUserId: string, payload: { startTime: string, endTime: string }) => {
+const createBooking = async (
+    studentUserId: string,
+    tutorUserId: string,
+    payload: { startTime: string, endTime: string }
+) => {
     const tutorProfile = await prisma.tutorProfile.findUnique({
         where: { userId: tutorUserId },
-        select: {
-            id: true,
-            hourlyRate: true
-        }
+        select: { id: true, hourlyRate: true }
     });
 
     if (!tutorProfile) {
-        throw new Error("Tutor profile not found for this user!");
+        throw new Error("Tutor profile not found!");
     }
 
     const start = new Date(payload.startTime);
@@ -21,13 +22,26 @@ const createBooking = async (studentUserId: string, tutorUserId: string, payload
         throw new Error("End time must be after start time!");
     }
 
+    // Check for overlapping confirmed bookings for the same tutor
+    const isAlreadyBooked = await prisma.booking.findFirst({
+        where: {
+            tutorId: tutorProfile.id,
+            status: BookingStatus.CONFIRMED,
+            AND: [
+                { startTime: { lt: end } },
+                { endTime: { gt: start } }
+            ]
+        }
+    });
+
+    if (isAlreadyBooked) {
+        throw new Error("Tutor is already booked for this time slot!");
+    }
+
     const durationInHours = Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
     const totalAmount = durationInHours * tutorProfile.hourlyRate;
 
-    const result = await prisma.booking.create({
-        include: {
-            tutor: true
-        },
+    return await prisma.booking.create({
         data: {
             startTime: start,
             endTime: end,
@@ -35,83 +49,69 @@ const createBooking = async (studentUserId: string, tutorUserId: string, payload
             studentId: studentUserId,
             tutorId: tutorProfile.id,
             status: BookingStatus.CONFIRMED
+        },
+        include: {
+            tutor: { include: { user: { select: { name: true } } } },
+            student: { select: { name: true } }
         }
-    })
-
-    return result;
+    });
 };
 
 const getAllBookings = async () => {
-    const result = await prisma.booking.findMany({
+    return await prisma.booking.findMany({
         include: {
-            tutor: {
-                include: {
-                    user: {
-                        select: {
-                            name: true,
-                            email: true
-                        }
-                    }
-                }
-            },
-            student: {
-                select: {
-                    name: true,
-                    email: true
-                }
-            }
+            tutor: { include: { user: { select: { name: true, email: true } } } },
+            student: { select: { name: true, email: true } }
         },
-        orderBy: {
-            createdAt: 'desc'
-        }
-    })
-
-    return result;
+        orderBy: { createdAt: 'desc' }
+    });
 };
 
 const getSingleBooking = async (id: string) => {
     const result = await prisma.booking.findUnique({
-        where: { id: id },
+        where: { id },
         include: {
-            tutor: true,
-            student: {
-                select: {
-                    name: true,
-                    email: true
-                }
-            }
+            tutor: { include: { user: { select: { name: true, email: true } } } },
+            student: { select: { name: true, email: true } },
+            review: true
         }
     });
-
+    if (!result) throw new Error("Booking not found!");
     return result;
-}
+};
 
 const getMyBooking = async (userId: string, role: string) => {
-    let whereCondition: any = {}
+    let whereCondition: any = {};
 
     if (role === UserRole.STUDENT) {
         whereCondition = { studentId: userId };
     } else if (role === UserRole.TUTOR) {
-        whereCondition = { tutorId: userId };
+        const profile = await prisma.tutorProfile.findUnique({ where: { userId } });
+        if (!profile) return [];
+        whereCondition = { tutorId: profile.id };
     }
 
-    const result = await prisma.booking.findMany({
+    return await prisma.booking.findMany({
         where: whereCondition,
         include: {
-            tutor: true,
-            student: true
+            tutor: { include: { user: { select: { name: true } } } },
+            student: { select: { name: true } }
         },
-        orderBy: {
-            createdAt: 'desc'
-        }
+        orderBy: { createdAt: 'desc' }
     });
+};
 
-    return result
-}
+const updateBookingStatus = async (bookingId: string, status: BookingStatus) => {
+    return await prisma.booking.update({
+        where: { id: bookingId },
+        data: { status }
+    });
+};
 
 export const bookingService = {
     createBooking,
     getAllBookings,
     getSingleBooking,
-    getMyBooking
-}
+    getMyBooking,
+    updateBookingStatus
+};

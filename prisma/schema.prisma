@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -19,6 +13,11 @@ enum UserRole {
   ADMIN
 }
 
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED
@@ -27,29 +26,31 @@ enum BookingStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(uuid())
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(true)
+  email         String   @unique
+  emailVerified Boolean  @default(true)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  tutorProfile    TutorProfile?
-  studentBookings Booking[]     @relation("StudentBookings")
-  studentReviews  Review[]      @relation("StudentReviews")
+  role      String? @default("STUDENT")
+  phone     String?
+  status    String? @default("ACTIVE")
+  isDeleted Boolean @default(false)
 
-  role   String? @default("STUDENT")
-  phone  String?
-  status String? @default("ACTIVE")
+  sessions     Session[]
+  accounts     Account[]
+  tutorProfile TutorProfile?
+
+  studentBookings Booking[] @relation("StudentBookings")
+  studentReviews  Review[]  @relation("StudentReviews")
 
   @@map("user")
 }
 
 model Session {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   expiresAt DateTime
   token     String   @unique
   createdAt DateTime @default(now())
@@ -64,7 +65,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id @default(cuid())
+  id                    String    @id @default(uuid())
   accountId             String
   providerId            String
   userId                String
@@ -84,7 +85,7 @@ model Account {
 }
 
 model Verification {
-  id         String   @id @default(cuid())
+  id         String   @id @default(uuid())
   identifier String
   value      String
   expiresAt  DateTime
@@ -95,53 +96,42 @@ model Verification {
   @@map("verification")
 }
 
-// --- SkillBridge Business Tables ---
-
-model Category {
-  id            String         @id @default(cuid())
-  name          String         @unique
-  slug          String         @unique
-  tutorProfiles TutorProfile[]
-
-  @@map("category")
-}
-
 model TutorProfile {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  categoryName String
-  category     Category @relation(fields: [categoryName], references: [name])
-
-  subject String[]
-
-  bio          String @db.Text
+  id           String @id @default(uuid())
+  bio          String
+  subject      String
   hourlyRate   Float
-  availability Json
+  availability String
+  categoryName String
+  userId       String @unique
+  user         User   @relation(fields: [userId], references: [id])
 
-  bookings Booking[] @relation("TutorBookings")
-  reviews  Review[]  @relation("TutorReviews")
+  bookings Booking[]
+  reviews  Review[]
 
   @@map("tutor_profile")
 }
 
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+
+  @@map("category")
+}
+
 model Booking {
-  id        String   @id @default(cuid())
-  startTime DateTime
-  endTime   DateTime
-
-  status BookingStatus @default(CONFIRMED)
-
+  id           String        @id @default(uuid())
+  startTime    DateTime
+  endTime      DateTime
   totalAmmount Float
-
-  createdAt DateTime @default(now())
+  status       BookingStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
 
   studentId String
   student   User   @relation("StudentBookings", fields: [studentId], references: [id])
 
   tutorId String
-  tutor   TutorProfile @relation("TutorBookings", fields: [tutorId], references: [id])
+  tutor   TutorProfile @relation(fields: [tutorId], references: [id])
 
   review Review?
 
@@ -149,16 +139,16 @@ model Booking {
 }
 
 model Review {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   rating    Int
-  comment   String?  @db.Text
+  comment   String
   createdAt DateTime @default(now())
 
   studentId String
   student   User   @relation("StudentReviews", fields: [studentId], references: [id])
 
   tutorId String
-  tutor   TutorProfile @relation("TutorReviews", fields: [tutorId], references: [id])
+  tutor   TutorProfile @relation(fields: [tutorId], references: [id])
 
   bookingId String  @unique
   booking   Booking @relation(fields: [bookingId], references: [id])
