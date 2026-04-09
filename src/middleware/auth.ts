@@ -3,7 +3,6 @@ import { auth as betterAuth } from '../lib/auth';
 import { prisma } from "../lib/prisma";
 import { UserRole } from "../../generated/prisma";
 
-// Explicitly export UserRole so it can be imported as a named export elsewhere
 export { UserRole };
 
 declare global {
@@ -23,7 +22,6 @@ declare global {
 const auth = (...roles: UserRole[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            // 1. Get session using Better Auth API
             const session = await betterAuth.api.getSession({
                 headers: req.headers as any
             });
@@ -35,7 +33,6 @@ const auth = (...roles: UserRole[]) => {
                 });
             }
 
-            // 2. Fetch user from DB to check status (Blocked/Deleted)
             const dbUser = await prisma.user.findUnique({
                 where: { id: session.user.id }
             });
@@ -47,7 +44,6 @@ const auth = (...roles: UserRole[]) => {
                 });
             }
 
-            // 3. Check email verification if required
             if (!session.user.emailVerified) {
                 return res.status(403).json({
                     success: false,
@@ -55,17 +51,24 @@ const auth = (...roles: UserRole[]) => {
                 });
             }
 
-            // 4. Attach user data to request object
+            // Normalize role: better-auth might return string or string[]
+            const rawRole = session.user.role;
+            const userRole = Array.isArray(rawRole) ? rawRole[0] : rawRole;
+
             req.user = {
                 id: session.user.id,
                 email: session.user.email,
                 name: session.user.name,
-                role: session.user.role as string,
+                role: userRole as string,
                 emailVerified: session.user.emailVerified
             };
 
-            // 5. Role based access control
-            if (roles.length && !roles.includes(req.user.role as UserRole)) {
+            const currentUserRole = String(req.user.role).toUpperCase();
+
+            // অ্যালাউড রোলগুলোকেও আপারকেস স্ট্রিং এ কনভার্ট করে নেওয়া
+            const allowedRoles = roles.map(role => String(role).toUpperCase());
+
+            if (roles.length && !allowedRoles.includes(currentUserRole)) {
                 return res.status(403).json({
                     success: false,
                     message: "Forbidden! You don't have permission to access this resource."

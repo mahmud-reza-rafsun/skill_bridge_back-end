@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { tutorService } from "./turor.service";
 
-const createTutor = async (req: Request, res: Response) => {
+const createOrUpdateTutorProfile = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        const result = await tutorService.createTutor(req.body, userId as string);
+        const result = await tutorService.createOrUpdateTutorProfile(req.body, userId as string);
         res.status(201).json({ success: true, message: "Tutor profile created successfully", data: result });
     } catch (e: any) {
         res.status(400).json({ success: false, message: e.message });
@@ -13,11 +13,18 @@ const createTutor = async (req: Request, res: Response) => {
 
 const getAllTutors = async (req: Request, res: Response) => {
     try {
-        const { search } = req.query;
-        const result = await tutorService.getAllTutors(search as string);
-        res.status(200).json({ success: true, message: "Tutors fetched successfully", data: result });
+        const result = await tutorService.getAllTutors();
+
+        res.status(200).json({
+            success: true,
+            message: "Tutors fetched successfully",
+            data: result
+        });
     } catch (e: any) {
-        res.status(500).json({ success: false, message: e.message });
+        res.status(500).json({
+            success: false,
+            message: e.message || "Internal Server Error"
+        });
     }
 };
 
@@ -60,7 +67,7 @@ const getStudents = async (req: Request, res: Response) => {
 };
 
 export const tutorController = {
-    createTutor,
+    createOrUpdateTutorProfile,
     getAllTutors,
     getSingleTutor,
     updateProfile,

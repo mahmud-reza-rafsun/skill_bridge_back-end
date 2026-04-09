@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import { bookingService } from "./bookings.service";
-import { BookingStatus } from "../../../generated/prisma/enums";
+import { BookingStatus } from "../../../generated/prisma";
 
 const createBooking = async (req: Request, res: Response) => {
     try {
         const { tutorId } = req.params;
         const studentId = req.user?.id;
+        const { totalAmount } = req.body;
 
         const result = await bookingService.createBooking(
             studentId as string,
             tutorId as string,
-            req.body
+            { totalAmount: Number(totalAmount) }
         );
 
         res.status(201).json({

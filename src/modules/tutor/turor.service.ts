@@ -1,55 +1,70 @@
 import { BookingStatus } from "../../../generated/prisma";
 import { prisma } from "../../lib/prisma";
-import { UserRole } from "../../middleware/auth";
 
-const createTutor = async (data: any, userId: string) => {
-    const { categoryName, bio, hourlyRate, availability, subject } = data;
+const createOrUpdateTutorProfile = async (data: any, userId: string) => {
+    const { categoryName, bio, hourlyRate, subject, image } = data;
 
-    return prisma.$transaction(async (tx) => {
-        // 1. Check if profile already exists
-        const existingProfile = await tx.tutorProfile.findUnique({
-            where: { userId }
+    return await prisma.$transaction(async (tx) => {
+        // 1. Check if the user exists and their current status
+        const user = await tx.user.findUnique({
+            where: { id: userId },
         });
 
-        if (existingProfile) {
-            throw new Error("Tutor profile already exists for this user.");
+        if (!user) {
+            throw new Error("User not found.");
         }
 
-        // 2. Update user role to TUTOR
-        await tx.user.update({
-            where: { id: userId },
-            data: { role: UserRole.TUTOR }
-        });
-
-        // 3. Create Tutor Profile
-        return await tx.tutorProfile.create({
-            data: {
+        // 3. Create or Update Tutor Profile (Upsert prevents "already exists" errors)
+        const profile = await tx.tutorProfile.upsert({
+            where: { userId },
+            update: {
                 bio,
                 hourlyRate: Number(hourlyRate),
-                availability,
-                userId,
                 categoryName,
-                subject
+                subject,
+                image
+            },
+            create: {
+                userId,
+                bio,
+                hourlyRate: Number(hourlyRate),
+                categoryName,
+                subject,
+                image,
             },
             include: {
-                user: { select: { name: true, email: true, role: true } }
+                user: {
+                    select: {
+                        name: true,
+                        email: true,
+                        role: true,
+                        image: true
+                    }
+                }
             }
         });
+
+        return profile;
     });
 };
 
-const getAllTutors = async (search?: string) => {
+const getAllTutors = async () => {
     return await prisma.tutorProfile.findMany({
-        where: search ? {
-            OR: [
-                { subject: { contains: search, mode: 'insensitive' } },
-                { categoryName: { contains: search, mode: 'insensitive' } },
-                { user: { name: { contains: search, mode: 'insensitive' } } }
-            ]
-        } : {},
+        where: {
+            user: {
+                role: "TUTOR",
+                isDeleted: false,
+            }
+        },
         include: {
-            user: { select: { name: true, email: true, image: true } }
-        }
+            user: {
+                select: {
+                    name: true,
+                    email: true,
+                    image: true,
+                }
+            }
+        },
     });
 };
 
@@ -97,7 +112,6 @@ const getTutorDashboardData = async (userId: string) => {
             where: { tutorId: tutorProfile.id, status: BookingStatus.CONFIRMED },
             take: 5,
             include: { student: { select: { name: true, email: true } } },
-            orderBy: { startTime: 'asc' }
         })
     ]);
 
@@ -127,7 +141,7 @@ const getMyStudentsList = async (userId: string) => {
 };
 
 export const tutorService = {
-    createTutor,
+    createOrUpdateTutorProfile,
     getAllTutors,
     getSingleTutor,
     updateTutorProfile,

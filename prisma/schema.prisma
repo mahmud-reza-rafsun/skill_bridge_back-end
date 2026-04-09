@@ -96,22 +96,6 @@ model Verification {
   @@map("verification")
 }
 
-model TutorProfile {
-  id           String @id @default(uuid())
-  bio          String
-  subject      String
-  hourlyRate   Float
-  availability String
-  categoryName String
-  userId       String @unique
-  user         User   @relation(fields: [userId], references: [id])
-
-  bookings Booking[]
-  reviews  Review[]
-
-  @@map("tutor_profile")
-}
-
 model Category {
   id   String @id @default(uuid())
   name String @unique
@@ -119,13 +103,28 @@ model Category {
   @@map("category")
 }
 
+model TutorProfile {
+  id           String  @id @default(uuid())
+  bio          String
+  subject      String
+  image        String?
+  hourlyRate   Float
+  categoryName String
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id])
+
+  bookings Booking[]
+  reviews  Review[]
+
+  @@map("tutor_profile")
+}
+
 model Booking {
-  id           String        @id @default(uuid())
-  startTime    DateTime
-  endTime      DateTime
-  totalAmmount Float
-  status       BookingStatus @default(PENDING)
-  createdAt    DateTime      @default(now())
+  id          String        @id @default(uuid())
+  totalAmount Float // Fixed: totalAmmount -> totalAmount
+  status      BookingStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   studentId String
   student   User   @relation("StudentBookings", fields: [studentId], references: [id])
