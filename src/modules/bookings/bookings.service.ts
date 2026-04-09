@@ -64,33 +64,23 @@ const getSingleBooking = async (id: string) => {
     return result;
 };
 
-const getMyBooking = async (userId: string, role: string) => {
-    let whereCondition: any = {};
-
-    if (role === UserRole.STUDENT) {
-        whereCondition = { studentId: userId };
-    } else if (role === UserRole.TUTOR) {
-        const profile = await prisma.tutorProfile.findUnique({
-            where: { userId }
-        });
-
-        if (!profile) return [];
-        whereCondition = { tutorId: profile.id };
-    } else if (role === UserRole.ADMIN) {
-        whereCondition = {};
-    }
-
+const getMyBooking = async (userId: string) => {
     return await prisma.booking.findMany({
-        where: whereCondition,
+        where: {
+            studentId: userId // শুধুমাত্র লগইন করা ইউজারের আইডি দিয়ে ফিল্টার
+        },
         include: {
             tutor: {
                 include: {
-                    user: { select: { name: true, image: true } }
+                    user: {
+                        select: { name: true, image: true, email: true }
+                    }
                 }
-            },
-            student: { select: { name: true, email: true } }
+            }
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: {
+            createdAt: 'desc' // লেটেস্ট বুকিং আগে দেখাবে
+        }
     });
 };
 

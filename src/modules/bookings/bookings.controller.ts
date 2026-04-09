@@ -54,12 +54,12 @@ const getSingleBooking = async (req: Request, res: Response) => {
 const getMyBooking = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        const role = req.user?.role;
-        const result = await bookingService.getMyBooking(userId as string, role as string);
+
+        const result = await bookingService.getMyBooking(userId as string);
 
         res.status(200).json({
             success: true,
-            message: "My bookings retrieved successfully",
+            message: "Your bookings fetched successfully",
             data: result
         });
     } catch (e: any) {
