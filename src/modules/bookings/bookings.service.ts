@@ -67,7 +67,7 @@ const getSingleBooking = async (id: string) => {
 const getMyBooking = async (userId: string) => {
     return await prisma.booking.findMany({
         where: {
-            studentId: userId // শুধুমাত্র লগইন করা ইউজারের আইডি দিয়ে ফিল্টার
+            studentId: userId
         },
         include: {
             tutor: {
@@ -79,25 +79,16 @@ const getMyBooking = async (userId: string) => {
             }
         },
         orderBy: {
-            createdAt: 'desc' // লেটেস্ট বুকিং আগে দেখাবে
+            createdAt: 'desc'
         }
     });
 };
 
-const updateBookingStatus = async (bookingId: string, status: BookingStatus) => {
-    const isExist = await prisma.booking.findUnique({ where: { id: bookingId } });
-    if (!isExist) throw new Error("Booking not found!");
 
-    return await prisma.booking.update({
-        where: { id: bookingId },
-        data: { status }
-    });
-};
 
 export const bookingService = {
     createBooking,
     getAllBookings,
     getSingleBooking,
     getMyBooking,
-    updateBookingStatus
 };

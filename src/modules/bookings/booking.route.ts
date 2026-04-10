@@ -28,10 +28,4 @@ router.post(
     bookingsController.createBooking
 );
 
-router.patch(
-    "/status/:bookingId",
-    auth(UserRole.TUTOR, UserRole.ADMIN),
-    bookingsController.updateStatus
-);
-
 export const bookingRouter: Router = router;

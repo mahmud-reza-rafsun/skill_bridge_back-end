@@ -67,30 +67,9 @@ const getMyBooking = async (req: Request, res: Response) => {
     }
 };
 
-const updateStatus = async (req: Request, res: Response) => {
-    try {
-        const { bookingId } = req.params;
-        const { status } = req.body;
-
-        const result = await bookingService.updateBookingStatus(
-            bookingId as string,
-            status as BookingStatus
-        );
-
-        res.status(200).json({
-            success: true,
-            message: `Booking status updated to ${status}`,
-            data: result
-        });
-    } catch (e: any) {
-        res.status(400).json({ success: false, message: e.message });
-    }
-};
-
 export const bookingsController = {
     createBooking,
     getMyBooking,
-    updateStatus,
     getAllBooking,
     getSingleBooking
 };
