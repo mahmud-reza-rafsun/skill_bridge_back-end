@@ -10,6 +10,7 @@ const getAllUser = async (req: Request, res: Response) => {
     }
 };
 
+
 const blockUser = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
@@ -35,28 +36,39 @@ const deleteToggle = async (req: Request, res: Response) => {
     }
 };
 
-const getStats = async (req: Request, res: Response) => {
+const getAllBookings = async (req: Request, res: Response) => {
     try {
-        const result = await adminService.getAdminStats();
-        res.status(200).json({ success: true, data: result });
+        const result = await adminService.getAllBookings()
+        res.status(200).json({
+            success: true,
+            message: "Retrive all bookings",
+            data: result
+        });
     } catch (e: any) {
-        res.status(500).json({ success: false, message: e.message });
+        res.status(400).json({ success: false, message: e.message });
     }
 };
 
-const getAllBookings = async (req: Request, res: Response) => {
+const getAdminStats = async (req: Request, res: Response) => {
     try {
-        const result = await adminService.getAllBookingsFromDB();
-        res.status(200).json({ success: true, data: result });
+        const result = await adminService.getAdminStats();
+        res.status(200).json({
+            success: true,
+            message: "Admin statistics retrieved successfully",
+            data: result
+        });
     } catch (e: any) {
-        res.status(500).json({ success: false, message: e.message });
+        res.status(400).json({
+            success: false,
+            message: e.message || "Failed to fetch stats"
+        });
     }
 };
 
 export const adminController = {
     getAllUser,
     blockUser,
-    getStats,
+    getAdminStats,
     getAllBookings,
-    deleteToggle
+    deleteToggle,
 };

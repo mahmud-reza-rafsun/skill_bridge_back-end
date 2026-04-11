@@ -16,6 +16,7 @@ const getAllUser = async () => {
     });
 };
 
+
 const blockAndUnblockUser = async (id: string, status: UserStatus) => {
     return await prisma.user.update({
         where: { id },
@@ -35,6 +36,34 @@ const toggleUserDelete = async (id: string) => {
     });
 };
 
+const getAllBookings = async () => {
+    return await prisma.booking.findMany({
+        select: {
+            id: true,
+            status: true,
+            totalAmount: true,
+            date: true,
+            student: {
+                select: {
+                    name: true,
+                    email: true
+                }
+            },
+            tutor: {
+                select: {
+                    user: {
+                        select: {
+                            name: true,
+                            email: true
+                        }
+                    },
+                }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+};
+
 const getAdminStats = async () => {
     const [totalUsers, totalStudents, totalTutors, totalBookings, totalReviews] = await Promise.all([
         prisma.user.count({ where: { isDeleted: false } }),
@@ -45,41 +74,46 @@ const getAdminStats = async () => {
     ]);
 
     const totalEarnings = await prisma.booking.aggregate({
-        _sum: { totalAmmount: true }
+        _sum: { totalAmount: true }
     });
+
+    const last7DaysRevenue = await prisma.booking.groupBy({
+        by: ['createdAt'],
+        _sum: { totalAmount: true },
+        orderBy: { createdAt: 'asc' },
+        take: 7
+    });
+
+    const revenueDetails = last7DaysRevenue.map(item => ({
+        date: item.createdAt.toLocaleDateString('en-US', { weekday: 'short' }),
+        amount: item._sum.totalAmount || 0
+    }));
+
+    const platformOverview = [
+        { label: "Users", value: totalUsers },
+        { label: "Students", value: totalStudents },
+        { label: "Tutors", value: totalTutors },
+        { label: "Bookings", value: totalBookings },
+    ];
 
     return {
-        totalUsers,
-        totalStudents,
-        totalTutors,
-        totalBookings,
-        totalReviews,
-        totalRevenue: totalEarnings._sum.totalAmmount || 0
-    };
-};
-
-const getAllBookingsFromDB = async () => {
-    return await prisma.booking.findMany({
-        select: {
-            id: true,
-            status: true,
-            totalAmmount: true,
-            student: { select: { name: true, email: true } },
-            tutor: {
-                select: {
-                    user: { select: { name: true } },
-                    subject: true,
-                }
-            }
+        stats: {
+            totalUsers,
+            totalStudents,
+            totalTutors,
+            totalBookings,
+            totalReviews,
+            totalRevenue: totalEarnings._sum.totalAmount || 0
         },
-        orderBy: { createdAt: 'desc' }
-    });
+        revenueDetails,
+        platformOverview
+    };
 };
 
 export const adminService = {
     getAllUser,
     blockAndUnblockUser,
     getAdminStats,
-    getAllBookingsFromDB,
-    toggleUserDelete
+    getAllBookings,
+    toggleUserDelete,
 };
