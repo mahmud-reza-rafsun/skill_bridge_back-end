@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx tsx watch src/server.ts",
     "build": "prisma generate && tsup",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "generate": "bun x prisma generate",
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio"
   },
   "keywords": [],
   "author": "",

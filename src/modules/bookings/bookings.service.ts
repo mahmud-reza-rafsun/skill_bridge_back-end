@@ -4,7 +4,7 @@ import { prisma } from "../../lib/prisma";
 const createBooking = async (
     studentUserId: string,
     tutorIdFromProfile: string,
-    payload: { totalAmount: number }
+    payload: { totalAmount: number, date: Date }
 ) => {
     const tutorProfile = await prisma.tutorProfile.findUnique({
         where: { id: tutorIdFromProfile },
@@ -20,6 +20,7 @@ const createBooking = async (
             totalAmount: payload.totalAmount || tutorProfile.hourlyRate,
             studentId: studentUserId,
             tutorId: tutorProfile.id,
+            date: payload.date, // Prisma মডেলে সেভ হচ্ছে
             status: BookingStatus.PENDING
         },
         include: {

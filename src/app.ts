@@ -9,6 +9,7 @@ import { bookingRouter } from "./modules/bookings/booking.route";
 import { ReviewRouter } from "./modules/reviews/review.route";
 import { AdminRouter } from "./modules/admin/admin.route";
 import { tutorsRouter } from "./modules/tutors/tutor.route";
+import { categoryRouter } from "./modules/category/category.route";
 
 const app: Application = express();
 
@@ -57,6 +58,7 @@ app.use("/api/tutors", tutorRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/tutors", tutorsRouter);
 app.use("/api/reviews", ReviewRouter);
+app.use("/api/category", categoryRouter);
 app.use("/api/admin", AdminRouter);
 
 // --- Base Route ---

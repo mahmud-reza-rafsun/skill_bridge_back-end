@@ -6,12 +6,12 @@ const createBooking = async (req: Request, res: Response) => {
     try {
         const { tutorId } = req.params;
         const studentId = req.user?.id;
-        const { totalAmount } = req.body;
+        const { totalAmount, date } = req.body;
 
         const result = await bookingService.createBooking(
             studentId as string,
             tutorId as string,
-            { totalAmount: Number(totalAmount) }
+            { totalAmount: Number(totalAmount), date }
         );
 
         res.status(201).json({

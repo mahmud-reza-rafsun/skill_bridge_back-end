@@ -99,6 +99,7 @@ model Verification {
 model Category {
   id   String @id @default(uuid())
   name String @unique
+  slug String @unique
 
   @@map("category")
 }
@@ -125,9 +126,9 @@ model Booking {
   status      BookingStatus @default(PENDING)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-
-  studentId String
-  student   User   @relation("StudentBookings", fields: [studentId], references: [id])
+  date        DateTime
+  studentId   String
+  student     User          @relation("StudentBookings", fields: [studentId], references: [id])
 
   tutorId String
   tutor   TutorProfile @relation(fields: [tutorId], references: [id])
