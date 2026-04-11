@@ -13,7 +13,7 @@ router.get(
 router.get(
     "/get-my-booking",
     auth(UserRole.STUDENT, UserRole.TUTOR, UserRole.ADMIN),
-    bookingsController.getMyBooking
+    bookingsController.getTutorBookings
 )
 
 router.get(

@@ -1,11 +1,7 @@
-import { BookingStatus, UserRole } from "../../../generated/prisma";
 import { prisma } from "../../lib/prisma";
 
-const createBooking = async (
-    studentUserId: string,
-    tutorIdFromProfile: string,
-    payload: { totalAmount: number, date: Date }
-) => {
+// backend/service/booking.service.ts
+const createBooking = async (studentUserId: string, tutorIdFromProfile: string, payload: { totalAmount: number, date: any }) => {
     const tutorProfile = await prisma.tutorProfile.findUnique({
         where: { id: tutorIdFromProfile },
         select: { id: true, hourlyRate: true }
@@ -15,13 +11,24 @@ const createBooking = async (
         throw new Error("Tutor profile not found!");
     }
 
+    const existingBooking = await prisma.booking.findFirst({
+        where: {
+            tutorId: tutorProfile.id,
+            date: new Date(payload.date),
+        }
+    });
+
+    if (existingBooking) {
+        throw new Error("This tutor is already booked for this date!");
+    }
+
     return await prisma.booking.create({
         data: {
             totalAmount: payload.totalAmount || tutorProfile.hourlyRate,
             studentId: studentUserId,
             tutorId: tutorProfile.id,
-            date: payload.date, // Prisma মডেলে সেভ হচ্ছে
-            status: BookingStatus.PENDING
+            date: new Date(payload.date),
+            status: "PENDING"
         },
         include: {
             tutor: {
@@ -65,17 +72,27 @@ const getSingleBooking = async (id: string) => {
     return result;
 };
 
-const getMyBooking = async (userId: string) => {
+const getTutorBookings = async (userId: string) => {
+    const tutorProfile = await prisma.tutorProfile.findUnique({
+        where: { userId: userId },
+        select: { id: true }
+    });
+
+    if (!tutorProfile) {
+        throw new Error("Tutor profile not found!");
+    }
+
     return await prisma.booking.findMany({
         where: {
-            studentId: userId
+            tutorId: tutorProfile.id
         },
         include: {
-            tutor: {
-                include: {
-                    user: {
-                        select: { name: true, image: true, email: true }
-                    }
+            student: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true
                 }
             }
         },
@@ -91,5 +108,5 @@ export const bookingService = {
     createBooking,
     getAllBookings,
     getSingleBooking,
-    getMyBooking,
+    getTutorBookings,
 };

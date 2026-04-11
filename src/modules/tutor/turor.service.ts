@@ -1,11 +1,12 @@
-import { BookingStatus } from "../../../generated/prisma";
+import { BookingStatus, UserRole } from "../../../generated/prisma";
 import { prisma } from "../../lib/prisma";
 
 const createOrUpdateTutorProfile = async (data: any, userId: string) => {
     const { categoryName, bio, hourlyRate, subject, image } = data;
 
+    const subjectData = Array.isArray(subject) ? subject.join(", ") : subject;
+
     return await prisma.$transaction(async (tx) => {
-        // 1. Check if the user exists and their current status
         const user = await tx.user.findUnique({
             where: { id: userId },
         });
@@ -14,14 +15,13 @@ const createOrUpdateTutorProfile = async (data: any, userId: string) => {
             throw new Error("User not found.");
         }
 
-        // 3. Create or Update Tutor Profile (Upsert prevents "already exists" errors)
         const profile = await tx.tutorProfile.upsert({
             where: { userId },
             update: {
                 bio,
                 hourlyRate: Number(hourlyRate),
                 categoryName,
-                subject,
+                subject: subjectData,
                 image
             },
             create: {
@@ -29,7 +29,7 @@ const createOrUpdateTutorProfile = async (data: any, userId: string) => {
                 bio,
                 hourlyRate: Number(hourlyRate),
                 categoryName,
-                subject,
+                subject: subjectData,
                 image,
             },
             include: {
@@ -52,7 +52,7 @@ const getAllTutors = async () => {
     return await prisma.tutorProfile.findMany({
         where: {
             user: {
-                role: "TUTOR",
+                role: UserRole.TUTOR,
                 isDeleted: false,
             }
         },

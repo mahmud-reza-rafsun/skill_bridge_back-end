@@ -1,18 +1,24 @@
 import { Request, Response } from "express";
 import { bookingService } from "./bookings.service";
-import { BookingStatus } from "../../../generated/prisma";
 
+// backend/controller/booking.controller.ts
 const createBooking = async (req: Request, res: Response) => {
     try {
         const { tutorId } = req.params;
         const studentId = req.user?.id;
         const { totalAmount, date } = req.body;
 
+        console.log("Received Date from Frontend:", date);
+
         const result = await bookingService.createBooking(
             studentId as string,
             tutorId as string,
-            { totalAmount: Number(totalAmount), date }
+            {
+                totalAmount: Number(totalAmount),
+                date: date
+            }
         );
+        console.log("console from controller.ts", result.date);
 
         res.status(201).json({
             success: true,
@@ -51,15 +57,15 @@ const getSingleBooking = async (req: Request, res: Response) => {
     }
 };
 
-const getMyBooking = async (req: Request, res: Response) => {
+const getTutorBookings = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
 
-        const result = await bookingService.getMyBooking(userId as string);
+        const result = await bookingService.getTutorBookings(userId as string);
 
         res.status(200).json({
             success: true,
-            message: "Your bookings fetched successfully",
+            message: "Incoming student bookings fetched successfully",
             data: result
         });
     } catch (e: any) {
@@ -69,7 +75,7 @@ const getMyBooking = async (req: Request, res: Response) => {
 
 export const bookingsController = {
     createBooking,
-    getMyBooking,
+    getTutorBookings,
     getAllBooking,
     getSingleBooking
 };
