@@ -11,12 +11,6 @@ router.get(
 );
 
 router.get(
-    "/get-my-booking",
-    auth(UserRole.STUDENT, UserRole.TUTOR, UserRole.ADMIN),
-    bookingsController.getTutorBookings
-)
-
-router.get(
     "/:bookingId",
     auth(UserRole.TUTOR, UserRole.STUDENT, UserRole.ADMIN),
     bookingsController.getSingleBooking

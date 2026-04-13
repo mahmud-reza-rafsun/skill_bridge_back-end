@@ -72,41 +72,8 @@ const getSingleBooking = async (id: string) => {
     return result;
 };
 
-const getTutorBookings = async (userId: string) => {
-    const tutorProfile = await prisma.tutorProfile.findUnique({
-        where: { userId: userId },
-        select: { id: true }
-    });
-
-    if (!tutorProfile) {
-        throw new Error("Tutor profile not found!");
-    }
-
-    return await prisma.booking.findMany({
-        where: {
-            tutorId: tutorProfile.id
-        },
-        include: {
-            student: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    image: true
-                }
-            }
-        },
-        orderBy: {
-            createdAt: 'desc'
-        }
-    });
-};
-
-
-
 export const bookingService = {
     createBooking,
     getAllBookings,
     getSingleBooking,
-    getTutorBookings,
 };

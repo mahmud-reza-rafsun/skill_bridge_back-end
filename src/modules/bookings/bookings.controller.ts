@@ -57,25 +57,8 @@ const getSingleBooking = async (req: Request, res: Response) => {
     }
 };
 
-const getTutorBookings = async (req: Request, res: Response) => {
-    try {
-        const userId = req.user?.id;
-
-        const result = await bookingService.getTutorBookings(userId as string);
-
-        res.status(200).json({
-            success: true,
-            message: "Incoming student bookings fetched successfully",
-            data: result
-        });
-    } catch (e: any) {
-        res.status(500).json({ success: false, message: e.message });
-    }
-};
-
 export const bookingsController = {
     createBooking,
-    getTutorBookings,
     getAllBooking,
-    getSingleBooking
+    getSingleBooking,
 };

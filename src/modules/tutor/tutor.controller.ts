@@ -66,11 +66,56 @@ const getStudents = async (req: Request, res: Response) => {
     }
 };
 
+const getTutorBookings = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        console.log("userID", userId)
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Unauthorized access" });
+        }
+
+        const result = await tutorService.getTutorBookings(userId);
+
+        res.status(200).json({
+            success: true,
+            message: "Student requests fetched successfully",
+            data: result
+        });
+    } catch (e: any) {
+        res.status(500).json({
+            success: false,
+            message: e.message || "Something went wrong"
+        });
+    }
+};
+
+const updateBookingStatus = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body; // ফ্রন্টএন্ড থেকে 'CONFIRMED' অথবা 'CANCELLED' আসবে
+
+        const result = await tutorService.updateBookingStatus(id as string, status);
+
+        res.status(200).json({
+            success: true,
+            message: `Booking ${status.toLowerCase()} successfully`,
+            data: result
+        });
+    } catch (e: any) {
+        res.status(500).json({
+            success: false,
+            message: e.message || "Failed to update status"
+        });
+    }
+};
+
 export const tutorController = {
     createOrUpdateTutorProfile,
     getAllTutors,
     getSingleTutor,
     updateProfile,
     getDashboard,
-    getStudents
+    getStudents,
+    getTutorBookings,
+    updateBookingStatus
 };
