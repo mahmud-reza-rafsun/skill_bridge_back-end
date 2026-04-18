@@ -46,6 +46,47 @@ const createReview = async (
     });
 };
 
+const getTutorBooking = async (tutorUserId: string) => {
+    return await prisma.booking.findMany({
+        where: {
+            tutor: {
+                userId: tutorUserId
+            }
+        },
+        include: {
+            review: {
+                select: {
+                    rating: true,
+                    comment: true,
+                }
+            },
+            tutor: {
+                include: {
+                    user: {
+                        select: {
+                            name: true,
+                            email: true,
+                            image: true
+                        }
+                    }
+                }
+            },
+            student: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true
+                }
+            }
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+};
+
 export const reviewService = {
     createReview,
+    getTutorBooking,
 };

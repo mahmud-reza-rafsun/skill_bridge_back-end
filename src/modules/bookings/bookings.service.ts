@@ -1,7 +1,11 @@
+import { BookingStatus } from "../../../generated/prisma";
 import { prisma } from "../../lib/prisma";
 
-// backend/service/booking.service.ts
-const createBooking = async (studentUserId: string, tutorIdFromProfile: string, payload: { totalAmount: number, date: any }) => {
+const createBooking = async (
+    studentUserId: string,
+    tutorIdFromProfile: string,
+    payload: { totalAmount: number, day: string, slot: string }
+) => {
     const tutorProfile = await prisma.tutorProfile.findUnique({
         where: { id: tutorIdFromProfile },
         select: { id: true, hourlyRate: true }
@@ -10,24 +14,25 @@ const createBooking = async (studentUserId: string, tutorIdFromProfile: string, 
     if (!tutorProfile) {
         throw new Error("Tutor profile not found!");
     }
-
     const existingBooking = await prisma.booking.findFirst({
         where: {
             tutorId: tutorProfile.id,
-            date: new Date(payload.date),
+            day: payload.day,
+            slot: payload.slot,
+            status: 'PENDING'
         }
     });
 
     if (existingBooking) {
-        throw new Error("This tutor is already booked for this date!");
+        throw new Error(`Tutor is already booked on ${payload.day} at ${payload.slot}!`);
     }
-
     return await prisma.booking.create({
         data: {
             totalAmount: payload.totalAmount || tutorProfile.hourlyRate,
             studentId: studentUserId,
             tutorId: tutorProfile.id,
-            date: new Date(payload.date),
+            day: payload.day,
+            slot: payload.slot,
             status: "PENDING"
         },
         include: {
@@ -72,8 +77,58 @@ const getSingleBooking = async (id: string) => {
     return result;
 };
 
+const getTutorBookings = async (studentUserId: string) => {
+    return await prisma.booking.findMany({
+        where: {
+            studentId: studentUserId,
+        },
+        include: {
+            tutor: {
+                include: {
+                    user: {
+                        select: {
+                            name: true,
+                            email: true,
+                            image: true,
+                        },
+                    },
+                },
+            },
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    });
+};
+
+const completeSession = async (bookingId: string, studentId: string) => {
+    const booking = await prisma.booking.findFirst({
+        where: {
+            id: bookingId,
+            studentId: studentId,
+            status: BookingStatus.CONFIRMED,
+        },
+    });
+
+    if (!booking) {
+        throw new Error("Only confirmed sessions can be marked as completed.");
+    }
+
+    return await prisma.booking.update({
+        where: {
+            id: bookingId,
+        },
+        data: {
+            status: BookingStatus.COMPLETED,
+        },
+    });
+};
+
+
 export const bookingService = {
     createBooking,
     getAllBookings,
     getSingleBooking,
+    getTutorBookings,
+    completeSession
 };

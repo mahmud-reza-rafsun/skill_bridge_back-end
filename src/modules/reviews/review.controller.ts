@@ -25,6 +25,27 @@ const createReview = async (req: Request, res: Response) => {
     }
 };
 
+const getTutorBooking = async (req: Request, res: Response) => {
+    try {
+        const tutorUserId = req.user?.id;
+
+        const result = await reviewService.getTutorBooking(
+            tutorUserId as string
+        );
+        res.status(200).json({
+            success: true,
+            message: "Tutor bookings retrieved successfully",
+            data: result
+        });
+    } catch (e: any) {
+        res.status(400).json({
+            success: false,
+            message: e.message || "Tutor bookings retrieval failed"
+        });
+    }
+};
+
 export const reviewController = {
-    createReview
+    createReview,
+    getTutorBooking
 };

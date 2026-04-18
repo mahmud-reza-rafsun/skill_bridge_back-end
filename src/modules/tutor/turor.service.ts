@@ -63,7 +63,8 @@ const getAllTutors = async () => {
                     email: true,
                     image: true,
                 }
-            }
+            },
+            availability: true
         },
     });
 };
@@ -183,13 +184,10 @@ const getMyStudentsList = async (userId: string) => {
 };
 
 const getTutorBookings = async (userId: string) => {
-    console.log("Attempting to find profile for User ID:", userId);
 
     const tutorProfile = await prisma.tutorProfile.findFirst({
         where: { userId: userId }
     });
-
-    console.log("Database result for tutorProfile:", tutorProfile);
 
     if (!tutorProfile) {
         throw new Error(`Tutor profile missing for User ID: ${userId}. Please ensure this user is registered as a tutor.`);
@@ -207,7 +205,6 @@ const getTutorBookings = async (userId: string) => {
 };
 
 const updateBookingStatus = async (bookingId: string, status: BookingStatus) => {
-    // বুকিংটি আসলে আছে কি না তা চেক করা
     const isBookingExist = await prisma.booking.findUnique({
         where: { id: bookingId }
     });
@@ -215,11 +212,49 @@ const updateBookingStatus = async (bookingId: string, status: BookingStatus) => 
     if (!isBookingExist) {
         throw new Error("Booking not found!");
     }
-
-    // স্ট্যাটাস আপডেট করা
     return await prisma.booking.update({
         where: { id: bookingId },
         data: { status }
+    });
+};
+
+const deleteBooking = async (id: string) => {
+    const isBookingExist = await prisma.booking.findUnique({
+        where: { id }
+    });
+
+    if (!isBookingExist) {
+        throw new Error("Booking not found!");
+    }
+
+    const result = await prisma.booking.delete({
+        where: { id }
+    });
+
+    return result;
+};
+
+const createTutorAvailability = async (availabilityData: any, userId: string) => {
+    return await prisma.$transaction(async (tx) => {
+        const tutorProfile = await tx.tutorProfile.findUnique({
+            where: { userId },
+        });
+
+        if (!tutorProfile) {
+            throw new Error("Tutor profile not found. Please create a profile first.");
+        }
+        const availability = await tx.availability.upsert({
+            where: { tutorProfileId: tutorProfile.id },
+            update: {
+                slots: availabilityData,
+            },
+            create: {
+                tutorProfileId: tutorProfile.id,
+                slots: availabilityData,
+            },
+        });
+
+        return availability;
     });
 };
 
@@ -231,5 +266,7 @@ export const tutorService = {
     getTutorDashboardData,
     getMyStudentsList,
     getTutorBookings,
-    updateBookingStatus
+    updateBookingStatus,
+    deleteBooking,
+    createTutorAvailability
 };

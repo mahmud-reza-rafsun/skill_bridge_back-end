@@ -14,9 +14,16 @@ router.post(
     auth(UserRole.STUDENT, UserRole.TUTOR, UserRole.ADMIN),
     tutorController.createOrUpdateTutorProfile
 );
+
+router.post("/create-availability", auth(UserRole.TUTOR), tutorController.createAvailability);
+router.delete(
+    '/delete-booking/:id',
+    auth(UserRole.TUTOR, UserRole.STUDENT),
+    tutorController.deleteBooking
+);
 router.patch("/profile", auth(UserRole.TUTOR), tutorController.updateProfile);
 router.patch('/status/:id',
-    auth(UserRole.TUTOR),
+    auth(UserRole.TUTOR, UserRole.STUDENT),
     tutorController.updateBookingStatus
 );
 

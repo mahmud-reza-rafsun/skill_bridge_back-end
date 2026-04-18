@@ -69,7 +69,6 @@ const getStudents = async (req: Request, res: Response) => {
 const getTutorBookings = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        console.log("userID", userId)
         if (!userId) {
             return res.status(401).json({ success: false, message: "Unauthorized access" });
         }
@@ -92,7 +91,7 @@ const getTutorBookings = async (req: Request, res: Response) => {
 const updateBookingStatus = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; // ফ্রন্টএন্ড থেকে 'CONFIRMED' অথবা 'CANCELLED' আসবে
+        const { status } = req.body;
 
         const result = await tutorService.updateBookingStatus(id as string, status);
 
@@ -109,6 +108,44 @@ const updateBookingStatus = async (req: Request, res: Response) => {
     }
 };
 
+const deleteBooking = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const result = await tutorService.deleteBooking(id as string);
+
+        res.status(200).json({
+            success: true,
+            message: "Booking deleted successfully!",
+            data: result
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message || "Something went wrong",
+        });
+    }
+};
+
+const createAvailability = async (req: Request, res: Response) => {
+    try {
+        const userId = req?.user?.id as string;
+        const availabilityData = req.body;
+
+        const result = await tutorService.createTutorAvailability(availabilityData, userId);
+
+        res.status(200).json({
+            success: true,
+            message: "Availability created successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 export const tutorController = {
     createOrUpdateTutorProfile,
     getAllTutors,
@@ -117,5 +154,7 @@ export const tutorController = {
     getDashboard,
     getStudents,
     getTutorBookings,
-    updateBookingStatus
+    updateBookingStatus,
+    deleteBooking,
+    createAvailability
 };

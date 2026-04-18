@@ -4,9 +4,14 @@ import { reviewController } from "./review.controller";
 
 const router = express.Router();
 
-// Only Student can create a review for a specific booking
+router.get(
+    "/get-tutor-reviews",
+    auth(UserRole.TUTOR),
+    reviewController.getTutorBooking
+);
+
 router.post(
-    "/:bookingId",
+    "/create-review/:bookingId",
     auth(UserRole.STUDENT),
     reviewController.createReview
 );

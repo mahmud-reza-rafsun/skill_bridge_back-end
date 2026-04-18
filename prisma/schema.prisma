@@ -22,6 +22,7 @@ enum BookingStatus {
   PENDING
   CONFIRMED
   CANCELLED
+  COMPLETED
 }
 
 model User {
@@ -113,10 +114,23 @@ model TutorProfile {
   userId       String  @unique
   user         User    @relation(fields: [userId], references: [id])
 
+  availability Availability?
+
   bookings Booking[]
   reviews  Review[]
 
   @@map("tutor_profile")
+}
+
+model Availability {
+  id             String       @id @default(uuid())
+  tutorProfileId String       @unique
+  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  slots          Json
+
+  updatedAt DateTime @updatedAt
+
+  @@map("availability")
 }
 
 model Booking {
@@ -125,7 +139,8 @@ model Booking {
   status      BookingStatus @default(PENDING)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  date        DateTime
+  day         String
+  slot        String
   studentId   String
   student     User          @relation("StudentBookings", fields: [studentId], references: [id])
 
