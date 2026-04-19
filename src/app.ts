@@ -13,37 +13,32 @@ import { categoryRouter } from "./modules/category/category.route";
 const app: Application = express();
 
 // --- CORS Configuration ---
-// const allowedOrigins = [
-//     process.env.APP_URL || "http://localhost:3000",
-//     process.env.APP_URL,
-// ].filter(Boolean) as string[];
+const allowedOrigins = [
+    process.env.APP_URL || "http://localhost:3000",
+    process.env.APP_URL,
+].filter(Boolean) as string[];
 
-// app.use(
-//     cors({
-//         origin: (origin, callback) => {
-//             if (!origin) return callback(null, true);
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin) return callback(null, true);
 
-//             const isAllowed =
-//                 allowedOrigins.includes(origin) ||
-//                 /^https:\/\/.*\.vercel\.app$/.test(origin);
+            const isAllowed =
+                allowedOrigins.includes(origin) ||
+                /^https:\/\/.*\.vercel\.app$/.test(origin);
 
-//             if (isAllowed) {
-//                 callback(null, true);
-//             } else {
-//                 callback(new Error(`Origin ${origin} not allowed by CORS`));
-//             }
-//         },
-//         credentials: true,
-//         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-//         allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-//         exposedHeaders: ["Set-Cookie"],
-//     })
-// );
-
-app.use(cors({
-    origin: true,
-    credentials: true
-}));
+            if (isAllowed) {
+                callback(null, true);
+            } else {
+                callback(new Error(`Origin ${origin} not allowed by CORS`));
+            }
+        },
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+        exposedHeaders: ["Set-Cookie"],
+    })
+);
 
 // --- Middleware ---
 app.use(express.json());
