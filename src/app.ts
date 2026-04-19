@@ -16,7 +16,7 @@ const app: Application = express();
 const allowedOrigins = [
     process.env.APP_URL || "http://localhost:3000",
     process.env.APP_URL,
-].filter(Boolean) as string[];
+].filter(Boolean);
 
 app.use(
     cors({
@@ -25,7 +25,8 @@ app.use(
 
             const isAllowed =
                 allowedOrigins.includes(origin) ||
-                /^https:\/\/.*\.vercel\.app$/.test(origin);
+                /^https:\/\/next-blog-client.*\.vercel\.app$/.test(origin) ||
+                /^https:\/\/.*\.vercel\.app$/.test(origin); // Any Vercel deployment
 
             if (isAllowed) {
                 callback(null, true);
@@ -37,15 +38,14 @@ app.use(
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
         exposedHeaders: ["Set-Cookie"],
-    })
+    }),
 );
 
 // --- Middleware ---
-app.use(express.json());
 app.set("trust proxy", 1);
 
-// --- Authentication Handler (Better Auth) ---
-app.all("/api/auth/*splat", toNodeHandler(auth));
+app.use('/api/auth', toNodeHandler(auth));
+app.use(express.json());
 
 // --- API Routes ---
 app.use("/api/tutors", tutorRouter);

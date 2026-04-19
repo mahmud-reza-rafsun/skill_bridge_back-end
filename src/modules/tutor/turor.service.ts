@@ -1,4 +1,4 @@
-import { BookingStatus, UserRole } from "../../../generated/prisma";
+import { BookingStatus, UserRole } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 
 const createOrUpdateTutorProfile = async (data: any, userId: string) => {

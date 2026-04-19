@@ -1,4 +1,4 @@
-import { UserStatus } from "../../../generated/prisma";
+import { UserStatus } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 
 const getAllUser = async () => {
