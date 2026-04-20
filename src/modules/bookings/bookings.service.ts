@@ -124,11 +124,45 @@ const completeSession = async (bookingId: string, studentId: string) => {
     });
 };
 
+const getStudentDashboard = async (studentId: string) => {
+    const allBookings = await prisma.booking.findMany({
+        where: { studentId },
+        include: {
+            tutor: {
+                include: {
+                    user: {
+                        select: { name: true, image: true }
+                    }
+                }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+
+    const stats = {
+        totalBookings: allBookings.length,
+        pendingBookings: allBookings.filter(b => b.status === BookingStatus.PENDING).length,
+        activeBookings: allBookings.filter(b => b.status === BookingStatus.CONFIRMED).length,
+        completedBookings: allBookings.filter(b => b.status === BookingStatus.COMPLETED).length,
+    };
+
+    const totalSpent = allBookings
+        .filter(b => b.status === BookingStatus.COMPLETED)
+        .reduce((sum, booking) => sum + (Number(booking.totalAmount) || 0), 0);
+
+    return {
+        stats,
+        totalSpent,
+        recentBookings: allBookings.slice(0, 5),
+    };
+};
+
 
 export const bookingService = {
     createBooking,
     getAllBookings,
     getSingleBooking,
     getTutorBookings,
-    completeSession
+    completeSession,
+    getStudentDashboard
 };

@@ -42,7 +42,8 @@ const getAllBookings = async () => {
             id: true,
             status: true,
             totalAmount: true,
-            date: true,
+            day: true,
+            slot: true,
             student: {
                 select: {
                     name: true,

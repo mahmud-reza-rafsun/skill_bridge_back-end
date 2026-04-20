@@ -48,13 +48,32 @@ const createOrUpdateTutorProfile = async (data: any, userId: string) => {
     });
 };
 
-const getAllTutors = async () => {
+const getAllTutors = async (query: { searchTerm?: string; category?: string }) => {
+    const { searchTerm, category } = query;
     return await prisma.tutorProfile.findMany({
         where: {
             user: {
                 role: UserRole.TUTOR,
                 isDeleted: false,
-            }
+            },
+            AND: [
+                searchTerm
+                    ? {
+                        subject: {
+                            contains: searchTerm,
+                            mode: 'insensitive',
+                        },
+                    }
+                    : {},
+                category
+                    ? {
+                        categoryName: {
+                            equals: category,
+                            mode: 'insensitive',
+                        },
+                    }
+                    : {},
+            ],
         },
         include: {
             user: {
@@ -62,9 +81,9 @@ const getAllTutors = async () => {
                     name: true,
                     email: true,
                     image: true,
-                }
+                },
             },
-            availability: true
+            availability: true,
         },
     });
 };
@@ -113,42 +132,57 @@ const getTutorDashboardData = async (userId: string) => {
         reviews,
         revenueChartData,
     ] = await Promise.all([
+        // 1. Total Earnings
         prisma.booking.aggregate({
             where: {
-                tutorId: tutorProfile.id
+                tutorId: tutorProfile.id,
+                status: BookingStatus.COMPLETED // Only completed sessions contribute to earnings
             },
             _sum: { totalAmount: true }
         }),
 
+        // 2. Unique Students Count
         prisma.booking.groupBy({
             by: ['studentId'],
             where: { tutorId: tutorProfile.id },
-            _count: true
         }),
 
+        // 3. Total Bookings
         prisma.booking.count({
             where: { tutorId: tutorProfile.id }
         }),
 
+        // 4. Upcoming Bookings Fix (Using createdAt or specific status)
         prisma.booking.count({
             where: {
                 tutorId: tutorProfile.id,
-                status: BookingStatus.CONFIRMED,
-                date: { gte: new Date() }
+                status: BookingStatus.PENDING // Assuming PENDING status indicates upcoming sessions,
+                // Since 'date' doesn't exist, we use createdAt or just status
+                // If you want strictly future ones and have no Date field, 
+                // filtering by status "CONFIRMED" is the most reliable way.
             }
         }),
 
+        // 5. Reviews and Ratings
         prisma.review.aggregate({
-            where: { tutorId: tutorProfile.id },
+            where: {
+                booking: { tutorId: tutorProfile.id }
+            },
             _avg: { rating: true },
             _count: { rating: true }
         }),
 
+        // 6. Revenue Chart Data (Grouping by day/slot needs formatting later)
         prisma.booking.findMany({
-            where: { tutorId: tutorProfile.id },
+            where: {
+                tutorId: tutorProfile.id,
+                status: BookingStatus.COMPLETED // Only completed sessions contribute to revenue 
+            },
             select: {
                 totalAmount: true,
-                createdAt: true
+                createdAt: true,
+                day: true,   // Added day
+                slot: true   // Added slot
             },
             orderBy: {
                 createdAt: 'asc'
@@ -165,7 +199,11 @@ const getTutorDashboardData = async (userId: string) => {
             averageRating: reviews._avg.rating?.toFixed(1) || "0.0",
             totalReviews: reviews._count.rating
         },
-        revenueChart: revenueChartData,
+        revenueChart: revenueChartData.map(item => ({
+            amount: item.totalAmount,
+            date: item.createdAt,
+            label: `${item.day} (${item.slot})` // Combining day and slot for chart labels
+        })),
     };
 };
 

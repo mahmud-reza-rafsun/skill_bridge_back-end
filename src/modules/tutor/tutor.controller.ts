@@ -13,7 +13,12 @@ const createOrUpdateTutorProfile = async (req: Request, res: Response) => {
 
 const getAllTutors = async (req: Request, res: Response) => {
     try {
-        const result = await tutorService.getAllTutors();
+        const { searchTerm, category } = req.query;
+
+        const result = await tutorService.getAllTutors({
+            searchTerm: searchTerm as string,
+            category: category as string,
+        });
 
         res.status(200).json({
             success: true,

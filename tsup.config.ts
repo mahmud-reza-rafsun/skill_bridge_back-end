@@ -9,9 +9,8 @@ export default defineConfig({
     external: ["pg-native"],
     bundle: true,
     noExternal: ["@prisma/client", "@prisma/adapter-pg"],
-    shims: true, // এটি খুবই গুরুত্বপূর্ণ
+    shims: true,
     banner: {
-        // ESM এ require সাপোর্ট করার জন্য এটি যোগ করুন
         js: `
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);

@@ -105,10 +105,29 @@ const completeSession = async (req: Request, res: Response) => {
     }
 };
 
+const getStudentDashboard = async (req: Request, res: Response) => {
+    try {
+        const studentId = req.user?.id;
+        const result = await bookingService.getStudentDashboard(studentId as string);
+
+        res.status(200).json({
+            success: true,
+            message: "Student dashboard data fetched successfully",
+            data: result
+        });
+    } catch (e: any) {
+        res.status(500).json({
+            success: false,
+            message: e.message || "Internal Server Error"
+        });
+    }
+};
+
 export const bookingsController = {
     createBooking,
     getAllBooking,
     getSingleBooking,
     getTutorBookings,
-    completeSession
+    completeSession,
+    getStudentDashboard
 };

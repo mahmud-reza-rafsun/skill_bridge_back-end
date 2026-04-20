@@ -13,33 +13,35 @@ import { categoryRouter } from "./modules/category/category.route";
 const app: Application = express();
 
 // --- CORS Configuration ---
-const allowedOrigins = [
-    process.env.APP_URL || "http://localhost:3000",
-    process.env.APP_URL,
-].filter(Boolean);
+// const allowedOrigins = [
+//     process.env.APP_URL || "http://localhost:3000",
+//     process.env.APP_URL,
+// ].filter(Boolean);
 
-app.use(
-    cors({
-        origin: (origin, callback) => {
-            if (!origin) return callback(null, true);
+// app.use(
+//     cors({
+//         origin: (origin, callback) => {
+//             if (!origin) return callback(null, true);
 
-            const isAllowed =
-                allowedOrigins.includes(origin) ||
-                /^https:\/\/next-blog-client.*\.vercel\.app$/.test(origin) ||
-                /^https:\/\/.*\.vercel\.app$/.test(origin); // Any Vercel deployment
+//             const isAllowed =
+//                 allowedOrigins.includes(origin) ||
+//                 /^https:\/\/next-blog-client.*\.vercel\.app$/.test(origin) ||
+//                 /^https:\/\/.*\.vercel\.app$/.test(origin); // Any Vercel deployment
 
-            if (isAllowed) {
-                callback(null, true);
-            } else {
-                callback(new Error(`Origin ${origin} not allowed by CORS`));
-            }
-        },
-        credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-        exposedHeaders: ["Set-Cookie"],
-    }),
-);
+//             if (isAllowed) {
+//                 callback(null, true);
+//             } else {
+//                 callback(new Error(`Origin ${origin} not allowed by CORS`));
+//             }
+//         },
+//         credentials: true,
+//         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+//         allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+//         exposedHeaders: ["Set-Cookie"],
+//     }),
+// );
+
+app.use(cors());
 
 // --- Middleware ---
 app.set("trust proxy", 1);

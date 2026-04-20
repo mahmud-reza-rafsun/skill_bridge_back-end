@@ -17,6 +17,12 @@ router.get(
 );
 
 router.get(
+    "/dashboard-stats",
+    auth(UserRole.STUDENT),
+    bookingsController.getStudentDashboard
+);
+
+router.get(
     "/:bookingId",
     auth(UserRole.TUTOR, UserRole.STUDENT, UserRole.ADMIN),
     bookingsController.getSingleBooking
