@@ -139,6 +139,15 @@ const getStudentDashboard = async (studentId: string) => {
         orderBy: { createdAt: 'desc' }
     });
 
+    const formattedBookings = allBookings.map((booking) => ({
+        id: booking.id,
+        bookingDate: booking.createdAt,
+        tutorName: booking.tutor?.user?.name,
+        tutorImage: booking.tutor?.user?.image,
+        status: booking.status,
+        totalAmount: booking.totalAmount
+    }));
+
     const stats = {
         totalBookings: allBookings.length,
         pendingBookings: allBookings.filter(b => b.status === BookingStatus.PENDING).length,
@@ -153,7 +162,7 @@ const getStudentDashboard = async (studentId: string) => {
     return {
         stats,
         totalSpent,
-        recentBookings: allBookings.slice(0, 5),
+        recentBookings: formattedBookings.slice(0, 5), // Using the formatted array here
     };
 };
 

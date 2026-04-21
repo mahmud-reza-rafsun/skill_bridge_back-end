@@ -6,8 +6,6 @@ const createReview = async (
     payload: { rating: number; comment?: string }
 ) => {
     const { rating, comment } = payload;
-
-    // 1. Check if the booking exists
     const bookingData = await prisma.booking.findUnique({
         where: { id: bookingId },
         select: {
@@ -19,13 +17,9 @@ const createReview = async (
     if (!bookingData) {
         throw new Error("Booking record not found!");
     }
-
-    // 2. Authorization: Only the student of this booking can review
     if (bookingData.studentId !== studentUserId) {
         throw new Error("You are not authorized to review this booking!");
     }
-
-    // 3. One-to-One check: Ensure no duplicate reviews for the same booking
     const isReviewExist = await prisma.review.findUnique({
         where: { bookingId }
     });
@@ -33,7 +27,6 @@ const createReview = async (
     if (isReviewExist) {
         throw new Error("You have already reviewed this booking!");
     }
-
     // 4. Create the review
     return await prisma.review.create({
         data: {

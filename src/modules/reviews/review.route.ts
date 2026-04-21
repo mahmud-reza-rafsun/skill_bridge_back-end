@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get(
     "/get-tutor-reviews",
-    auth(UserRole.TUTOR),
+    auth(UserRole.TUTOR, UserRole.ADMIN),
     reviewController.getTutorBooking
 );
 
