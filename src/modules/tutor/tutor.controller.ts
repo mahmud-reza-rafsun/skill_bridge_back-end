@@ -13,17 +13,23 @@ const createOrUpdateTutorProfile = async (req: Request, res: Response) => {
 
 const getAllTutors = async (req: Request, res: Response) => {
     try {
-        const { searchTerm, category } = req.query;
+        const { searchTerm, category, page, limit } = req.query;
 
-        const result = await tutorService.getAllTutors({
+        const queryData: any = {
             searchTerm: searchTerm as string,
             category: category as string,
-        });
+        };
+
+        if (page) queryData.page = Number(page);
+        if (limit) queryData.limit = Number(limit);
+
+        const result = await tutorService.getAllTutors(queryData);
 
         res.status(200).json({
             success: true,
             message: "Tutors fetched successfully",
-            data: result
+            meta: result.meta,
+            data: result.tutors
         });
     } catch (e: any) {
         res.status(500).json({

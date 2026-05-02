@@ -10,7 +10,8 @@
     "postinstall": "prisma generate",
     "generate": "bun x prisma generate",
     "migrate": "prisma migrate dev",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "stripe:webhook": "stripe listen --forward-to localhost:5000/api/payment/webhook"
   },
   "keywords": [],
   "author": "",
@@ -29,12 +30,16 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
+    "@types/cookie-parser": "^1.4.10",
+    "axios": "^1.16.0",
     "better-auth": "^1.4.17",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "nodemailer": "^7.0.13",
     "pg": "^8.17.2",
+    "stripe": "^22.1.0",
     "tsup": "^8.5.1"
   }
 }

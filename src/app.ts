@@ -2,15 +2,24 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
-
+import cookieParser from "cookie-parser";
 // Route Imports
 import { tutorRouter } from "./modules/tutor/tutor.route";
 import { bookingRouter } from "./modules/bookings/booking.route";
 import { ReviewRouter } from "./modules/reviews/review.route";
 import { AdminRouter } from "./modules/admin/admin.route";
 import { categoryRouter } from "./modules/category/category.route";
+import { userRouter } from "./modules/user/user.route";
+import { PaymentController } from "./modules/payment/payment.controller";
+import { PaymentRoutes } from "./modules/payment/payment.route";
 
 const app: Application = express();
+
+app.post(
+    "/api/payment/webhook",
+    express.raw({ type: "application/json" }),
+    PaymentController.handleStripeWebhookEvent
+);
 
 // --- CORS Configuration ---
 // const allowedOrigins = [
@@ -42,6 +51,7 @@ const app: Application = express();
 // );
 
 app.use(cors());
+app.use(cookieParser());
 
 // --- Middleware ---
 app.set("trust proxy", 1);
@@ -56,6 +66,8 @@ app.use("/api/tutors", tutorRouter);
 app.use("/api/reviews", ReviewRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/admin", AdminRouter);
+app.use("/api/user", userRouter);
+app.use("/api/payment", PaymentRoutes);
 
 // --- Base Route ---
 app.get("/", (req: Request, res: Response) => {

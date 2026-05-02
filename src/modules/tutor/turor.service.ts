@@ -48,44 +48,73 @@ const createOrUpdateTutorProfile = async (data: any, userId: string) => {
     });
 };
 
-const getAllTutors = async (query: { searchTerm?: string; category?: string }) => {
-    const { searchTerm, category } = query;
-    return await prisma.tutorProfile.findMany({
-        where: {
-            user: {
-                role: UserRole.TUTOR,
-                isDeleted: false,
-            },
-            AND: [
-                searchTerm
-                    ? {
-                        subject: {
-                            contains: searchTerm,
-                            mode: 'insensitive',
-                        },
-                    }
-                    : {},
-                category
-                    ? {
-                        categoryName: {
-                            equals: category,
-                            mode: 'insensitive',
-                        },
-                    }
-                    : {},
-            ],
+const getAllTutors = async (query: {
+    searchTerm?: string;
+    category?: string;
+    page?: number | undefined;
+    limit?: number | undefined;
+}) => {
+    const { searchTerm, category, page = 1, limit = 6 } = query;
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const whereCondition = {
+        user: {
+            role: UserRole.TUTOR,
+            isDeleted: false,
         },
-        include: {
-            user: {
-                select: {
-                    name: true,
-                    email: true,
-                    image: true,
+        AND: [
+            searchTerm
+                ? {
+                    subject: {
+                        contains: searchTerm,
+                        mode: 'insensitive' as const,
+                    },
+                }
+                : {},
+            category
+                ? {
+                    categoryName: {
+                        equals: category,
+                        mode: 'insensitive' as const,
+                    },
+                }
+                : {},
+        ],
+    };
+
+    const [tutors, totalCount] = await prisma.$transaction([
+        prisma.tutorProfile.findMany({
+            where: whereCondition,
+            skip,
+            take,
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        email: true,
+                        image: true,
+                    },
                 },
+                availability: true,
             },
-            availability: true,
-        },
-    });
+            orderBy: {
+                id: 'desc'
+            }
+        }),
+        prisma.tutorProfile.count({ where: whereCondition })
+    ]);
+
+    return {
+        tutors,
+        meta: {
+            page: Number(page),
+            limit: Number(limit),
+            total: totalCount,
+            totalPage: Math.ceil(totalCount / take)
+        }
+    };
 };
 
 const getSingleTutor = async (userId: string) => {

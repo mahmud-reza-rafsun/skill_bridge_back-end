@@ -70,10 +70,22 @@ export const auth = betterAuth({
 
     socialProviders: {
         google: {
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
             prompt: "select_account consent",
             accessType: "offline",
-            clientId: process.env.GOOGLE_CLIENT_ID as string,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+            // এই অংশটি নিশ্চিত করবে গুগল থেকে আসা ইউজাররা ডিফল্ট ভ্যালুগুলো পাচ্ছে
+            mapProfile: async (profile: any) => {
+                return {
+                    name: profile.name,
+                    email: profile.email,
+                    image: profile.picture,
+                    emailVerified: true,
+                    role: UserRole.STUDENT, // সরাসরি এখানে বলে দেওয়া হলো
+                    status: UserStatus.ACTIVE,
+                    isDeleted: false,
+                };
+            },
         }
     },
 
