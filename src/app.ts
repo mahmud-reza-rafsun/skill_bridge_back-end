@@ -12,6 +12,7 @@ import { categoryRouter } from "./modules/category/category.route";
 import { userRouter } from "./modules/user/user.route";
 import { PaymentController } from "./modules/payment/payment.controller";
 import { PaymentRoutes } from "./modules/payment/payment.route";
+import { studentRoutes } from "./modules/student/student.route";
 
 const app: Application = express();
 
@@ -68,6 +69,7 @@ app.use("/api/category", categoryRouter);
 app.use("/api/admin", AdminRouter);
 app.use("/api/user", userRouter);
 app.use("/api/payment", PaymentRoutes);
+app.use("/api/student", studentRoutes);
 
 // --- Base Route ---
 app.get("/", (req: Request, res: Response) => {
